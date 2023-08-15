@@ -1,1 +1,1 @@
-# TeamDevelopment_team1
+# Text editor - Проект текстового редактора на Qt команды 1
