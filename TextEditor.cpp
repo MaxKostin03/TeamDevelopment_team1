@@ -1,5 +1,9 @@
 #include "TextEditor.h"
 #include "ui_TextEditor.h"
+#include <QFile>
+#include <QFileDialog>
+#include <QTextStream>
+#include <QMessageBox>
 
 TextEditor::TextEditor(QWidget *parent)
     : QMainWindow(parent), uiPtr(new Ui::TextEditor)
@@ -24,8 +28,8 @@ QMenu *TextEditor::menuConfig()
     QMenu *menuFilePtr = new QMenu(this);
     menuFilePtr->setFont(font);
     menuFilePtr->setTitle(tr("File"));
-    menuFilePtr->addAction(tr("New"));
-    menuFilePtr->addAction(tr("Open"));
+    menuFilePtr->addAction(tr("New"), this, &TextEditor::slotFileNew);
+    menuFilePtr->addAction(tr("Open"), this, &TextEditor::slotFileOpen);
     menuFilePtr->addAction(tr("Save"));
     menuFilePtr->addAction(tr("Save as"));
     menuFilePtr->addAction(tr("Print"));
@@ -85,4 +89,40 @@ QMenu *TextEditor::viewMenu()
     menuViewPtr->addAction(tr("Dark mode"));
     menuViewPtr->addAction(tr("Light mode"));
     return menuViewPtr;
+}
+
+void TextEditor::slotRenameTitle(QString newName)
+{
+    if (newName == "")
+        setWindowTitle(tr("Text Editor - New document.txt*"));
+    else
+        setWindowTitle(tr("Text Editor - ") + newName);
+}
+
+void TextEditor::slotFileNew()
+{
+    uiPtr->textEdit->clear();        // if we opened existing file but want to make new file without any changes - we just clear all
+    file_path.clear();
+    QFileInfo fileInfo(file_path);
+    QString titleName = fileInfo.fileName();
+    slotRenameTitle(titleName);
+}
+
+void TextEditor::slotFileOpen()
+{
+    QString file_name = QFileDialog::getOpenFileName(this, "Open the file");
+    QFile file(file_name);
+    file_path = file_name;
+    if(!file.open(QFile::ReadOnly | QFile::Text))
+    {
+        QMessageBox::warning(this, "Warning", "File not opened");
+        return;
+    }
+    QTextStream in(&file);
+    QString text = in.readAll();
+    uiPtr->textEdit->setText(text);      // we show the content of file in the textBrowser
+    QFileInfo fileInfo(file_path);
+    QString titleName = fileInfo.fileName();
+    slotRenameTitle(titleName);
+    file.close();
 }

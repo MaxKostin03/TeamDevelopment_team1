@@ -16,8 +16,14 @@ public:
     TextEditor(QWidget *parent = nullptr);
     ~TextEditor();
 
+private slots:
+    void slotRenameTitle(QString newName);
+    void slotFileNew();
+    void slotFileOpen();
+
 private:
     Ui::TextEditor *uiPtr;
+    QString file_path = "";
     QMenu *menuConfig();
     QMenu *editMenu();
     QMenu *formatMenu();
