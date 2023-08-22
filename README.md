@@ -22,3 +22,5 @@
 # Документация
 
 [User Story](https://docs.google.com/document/d/1i7LTYiOP-8mIao-afAvzocvL6cRbZLUApR7EZdzpaUk/edit)
+
+[Правила пользованием репозиторием](https://docs.google.com/document/d/113ppjecXXtuixF7Md6dUx_5KaOasv0SfoyjWX1c9TKc/edit)
