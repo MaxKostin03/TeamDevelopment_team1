@@ -20,6 +20,17 @@ private slots:
     void slotRenameTitle(QString newName);
     void slotFileNew();
     void slotFileOpen();
+    void slotFileSave();
+    void slotFileSaveAs();
+    void slotExitFile();
+    void slotUndo();
+    void slotRedo();
+    void slotCopy();
+    void slotCut();
+    void slotPaste();
+    void slotSelectAll();
+    void closeEvent(QCloseEvent *event);
+    bool hasUnsavedChanges();
 
 private:
     Ui::TextEditor *uiPtr;
@@ -30,5 +41,6 @@ private:
     QMenu *insertMenu();
     QMenu *viewMenu();
 
+    bool isFileSaved = true;
 };
 #endif // TEXTEDITOR_H
