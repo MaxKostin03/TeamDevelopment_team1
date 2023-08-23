@@ -29,6 +29,12 @@ private slots:
     void slotCut();
     void slotPaste();
     void slotSelectAll();
+
+    void slotBold();
+    void slotItalic();
+    void slotUnderlined();
+    void slotCrossedOut();
+
     void closeEvent(QCloseEvent *event);
     bool hasUnsavedChanges();
 

@@ -61,10 +61,10 @@ QMenu *TextEditor::formatMenu()     // заполнение меню Format
     QMenu *menuFormatPtr = new QMenu(this);
     menuFormatPtr->setFont(font);
     menuFormatPtr->setTitle(tr("Format"));
-    menuFormatPtr->addAction(tr("Bold"));
-    menuFormatPtr->addAction(tr("Italic"));
-    menuFormatPtr->addAction(tr("Underline"));
-    menuFormatPtr->addAction(tr("Crossed"));
+    menuFormatPtr->addAction(tr("Bold"), this, &TextEditor::slotBold);              // кнопка вызова функции жирного шрифта
+    menuFormatPtr->addAction(tr("Italic"), this, &TextEditor::slotItalic);          // кнопка вызова функции курсивного шрифта
+    menuFormatPtr->addAction(tr("Underline"), this, &TextEditor::slotUnderlined);   // кнопка вызова функции подчеркнутого шрифта
+    menuFormatPtr->addAction(tr("Crossed"),this, &TextEditor::slotCrossedOut);      // кнопка вызова функции зачеркнутого шрифта
     menuFormatPtr->addSeparator();
     menuFormatPtr->addAction(tr("Font style"));
     menuFormatPtr->addAction(tr("Font color"));
@@ -275,6 +275,51 @@ void TextEditor::slotPaste()        // функция вставить
 void TextEditor::slotSelectAll()        // функция выделить все
 {
     uiPtr->textEdit->selectAll();
+}
+
+void TextEditor::slotBold()     // функция жирного шрифта
+{
+    if( uiPtr->textEdit->fontWeight() == QFont::Normal) {   // если текст не жирным шрифтом - делаем жирным
+        uiPtr->textEdit->setFontWeight(QFont::Bold);
+    }
+    else{                                                   // если текст жирным шрифтом - делаем не жирным
+        uiPtr->textEdit->setFontWeight(QFont::Normal);
+    }
+}
+
+void TextEditor::slotItalic()       // функциия курсивного шрифта
+{
+    if(uiPtr->textEdit->fontItalic() == false) {   // если текст не курсивным шрифтом - делаем курсив
+        uiPtr->textEdit->setFontItalic(true);
+    }
+    else{                                           // если текст курсивным шрифтом - делаем не курсивным
+        uiPtr->textEdit->setFontItalic(false);
+    }
+}
+
+void TextEditor::slotUnderlined()       // функция подчеркнутого шрифта
+{
+    if( uiPtr->textEdit->fontUnderline() == false) {    // если текст не подчерунцтым шрифтом - делаем подчеркнутым
+        uiPtr->textEdit->setFontUnderline(true);
+    }
+    else{                                               // если текст подчерунцтым шрифтом - делаем не подчеркнутым
+        uiPtr->textEdit->setFontUnderline(false);
+    }
+}
+
+void TextEditor::slotCrossedOut()       // функция зачеркинутого шрифта
+{
+    QFont font_ = uiPtr->textEdit->currentFont();
+
+    if( uiPtr->textEdit->currentFont().strikeOut() == false) {  // если текст не зачеркнутым шрифтом - делаем зачеркнутым
+        font_.setStrikeOut(true);
+        uiPtr->textEdit->setCurrentFont(font_);
+    }
+    else{                                                       // если текст зачеркнутым шрифтом - делаем не зачеркнутым
+        font_.setStrikeOut(false);
+        uiPtr->textEdit->setCurrentFont(font_);
+    }
+
 }
 
 bool TextEditor::hasUnsavedChanges()        // функция проверки сохранения текущего файла
