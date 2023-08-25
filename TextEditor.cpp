@@ -5,6 +5,7 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include <QCloseEvent>
+#include <QFontDialog>
 
 TextEditor::TextEditor(QWidget *parent)
     : QMainWindow(parent), uiPtr(new Ui::TextEditor)
@@ -66,7 +67,7 @@ QMenu *TextEditor::formatMenu()     // заполнение меню Format
     menuFormatPtr->addAction(tr("Underline"), this, &TextEditor::slotUnderlined);   // кнопка вызова функции подчеркнутого шрифта
     menuFormatPtr->addAction(tr("Crossed"),this, &TextEditor::slotCrossedOut);      // кнопка вызова функции зачеркнутого шрифта
     menuFormatPtr->addSeparator();
-    menuFormatPtr->addAction(tr("Font style"));
+    menuFormatPtr->addAction(tr("Font style"), this, &TextEditor::slotFontStyle);   // кнопка вызова функции изменения стиля шрифта
     menuFormatPtr->addAction(tr("Font color"));
     return menuFormatPtr;
 }
@@ -320,6 +321,17 @@ void TextEditor::slotCrossedOut()       // функция зачеркинуто
         uiPtr->textEdit->setCurrentFont(font_);
     }
 
+}
+
+void TextEditor::slotFontStyle()        // функция изменения стиля шрифта
+{
+    bool ok;
+    QFont font = QFontDialog::getFont(&ok, this);   // вызов программы изменения стиля шрифта
+    if (ok)
+    {
+        uiPtr->textEdit->setCurrentFont(font);      // если ОК - применить стиль
+    }
+    else return;                                    // если Cansel - выйти
 }
 
 bool TextEditor::hasUnsavedChanges()        // функция проверки сохранения текущего файла
