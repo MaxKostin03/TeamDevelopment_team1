@@ -68,7 +68,7 @@ QMenu *TextEditor::formatMenu()     // заполнение меню Format
     menuFormatPtr->addAction(tr("Crossed"),this, &TextEditor::slotCrossedOut);      // кнопка вызова функции зачеркнутого шрифта
     menuFormatPtr->addSeparator();
     menuFormatPtr->addAction(tr("Font style"), this, &TextEditor::slotFontStyle);   // кнопка вызова функции изменения стиля шрифта
-    menuFormatPtr->addAction(tr("Font color"));
+    menuFormatPtr->addAction(tr("Font color"), this, &TextEditor::slotFontColor);   // кнопка вызова функции изменения цвета шрифта
     return menuFormatPtr;
 }
 
@@ -334,6 +334,14 @@ void TextEditor::slotFontStyle()        // функция изменения с�
     else return;                                    // если Cansel - выйти
 }
 
+void TextEditor::slotFontColor()        // функция изменения цвета шрифта
+{
+
+    QPoint Pos =mapFromGlobal(QCursor::pos());
+    createColorPalette(Pos.x() , Pos.y()-(uiPtr->toolBar->height()));   // вызов функции выбора цветовой палитры
+
+}
+
 bool TextEditor::hasUnsavedChanges()        // функция проверки сохранения текущего файла
 {
     if(uiPtr->textEdit->toPlainText().length() > 0 && file_path.isEmpty()) {
@@ -351,4 +359,137 @@ bool TextEditor::hasUnsavedChanges()        // функция проверки �
     QString textContent = uiPtr->textEdit->toHtml();
 
     return (textContent != fileContent);
+}
+
+void TextEditor::setPaletteColors(){        // функция установки цвета отображаемых кнопок
+
+    redColorButton->setStyleSheet("background:red;");
+    orangeColorButton->setStyleSheet("background:orange;");
+    yellowColorButton->setStyleSheet("background:yellow;");
+    greenColorButton->setStyleSheet("background:green;");
+    whiteColorButton->setStyleSheet("background:white;");
+    blueColorButton->setStyleSheet("background:blue;");
+    purpleColorButton->setStyleSheet("background:purple;");
+    blackColorButton->setStyleSheet("background:black;");
+
+
+}
+
+void TextEditor::onRedColorButtonClicked()      // функция установки красного цвета шрифта
+{
+    uiPtr->textEdit->setTextColor(Qt::red);
+    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+}
+
+
+void TextEditor::onOrangeColorButtonClicked()       // функция установки оранжевого цвета шрифта
+{
+    uiPtr->textEdit->setTextColor(QColorConstants::Svg::orange);
+    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+}
+
+
+void TextEditor::onYellowColorButtonClicked()       // функция установки желтого цвета шрифта
+{
+    uiPtr->textEdit->setTextColor(Qt::yellow);
+    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+}
+
+
+void TextEditor::onGreenColorButtonClicked()        // функция установки зеленого цвета шрифта
+{
+    uiPtr->textEdit->setTextColor(Qt::green);
+    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+}
+
+
+void TextEditor::onWhiteColorButtonClicked()        // функция установки белого цвета шрифта
+{
+    uiPtr->textEdit->setTextColor(Qt::white);
+    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+}
+
+
+void TextEditor::onBlueColorButtonClicked()     // функция установки синего цвета шрифта
+{
+    uiPtr->textEdit->setTextColor(Qt::blue);
+    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+}
+
+
+void TextEditor::onPurpleColorButtonClicked()       // функция установки пурпурного цвета шрифта
+{
+    uiPtr->textEdit->setTextColor(QColorConstants::Svg::purple);
+    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+}
+
+
+void TextEditor::onBlackColorButtonClicked()        // функция установки черного цвета шрифта
+{
+    uiPtr->textEdit->setTextColor(Qt::black);
+    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+}
+
+void TextEditor::createColorPalette(qint32 x ,qint32 y , qint32 height , qint32 width){     // функция выбора цветовой палитры
+
+    if(window == NULL)  window = new QWidget(uiPtr->centralwidget);     // создание нового окна для кнопок цветовой палитры
+    window->setMaximumSize(height,width);
+    window->setGeometry(QRect(x,y,height,width));                       // установка положения и размеров окна для кнопок цветовой палитры
+
+    redColorButton = new QPushButton(this);
+    QObject::connect(redColorButton,&QPushButton::clicked, this, &TextEditor::onRedColorButtonClicked);         // кнопка вызова функции красного цвета шрифта
+
+    orangeColorButton= new QPushButton(this);
+    QObject::connect(orangeColorButton,&QPushButton::clicked, this, &TextEditor::onOrangeColorButtonClicked);   // кнопка вызова функции оранжевого цвета шрифта
+
+    yellowColorButton= new QPushButton(this);
+    QObject::connect(yellowColorButton,&QPushButton::clicked, this, &TextEditor::onYellowColorButtonClicked);   // кнопка вызова функции желтого цвета шрифта
+
+    greenColorButton= new QPushButton(this);
+    QObject::connect(greenColorButton,&QPushButton::clicked, this, &TextEditor::onGreenColorButtonClicked);     // кнопка вызова функции зеленого цвета шрифта
+
+    whiteColorButton= new QPushButton(this);
+    QObject::connect(whiteColorButton,&QPushButton::clicked, this, &TextEditor::onWhiteColorButtonClicked);     // кнопка вызова функции белого цвета шрифта
+
+    blueColorButton= new QPushButton(this);
+    QObject::connect(blueColorButton,&QPushButton::clicked, this, &TextEditor::onBlueColorButtonClicked);       // кнопка вызова функции синего цвета шрифта
+
+    purpleColorButton= new QPushButton(this);
+    QObject::connect(purpleColorButton,&QPushButton::clicked, this, &TextEditor::onPurpleColorButtonClicked);   // кнопка вызова функции пурпурного цвета шрифта
+
+    blackColorButton= new QPushButton(this);
+    QObject::connect(blackColorButton,&QPushButton::clicked, this, &TextEditor::onBlackColorButtonClicked);     // кнопка вызова функции черного цвета шрифта
+
+
+    gridGroupBox = new QGroupBox(tr("Palette"),window);     // создание группы для обьединения кнопок окна цветовой палитры
+    colorPalette = new QGridLayout;                         // создание макета сетки для группировки кнопок окна цветовой палитры
+    gridGroupBox->setLayout(colorPalette);                  // добавление макета сетки в группу
+
+    // расстановка кнопок цветовой палитры по сетке
+    colorPalette->addWidget(redColorButton,0,0,Qt::AlignCenter);
+    colorPalette->addWidget(orangeColorButton,0,1,Qt::AlignCenter);
+    colorPalette->addWidget(yellowColorButton,0,2,Qt::AlignCenter);
+    colorPalette->addWidget(greenColorButton,0,3,Qt::AlignCenter);
+    colorPalette->addWidget(whiteColorButton,1,0,Qt::AlignCenter);
+    colorPalette->addWidget(blueColorButton,1,1,Qt::AlignCenter);
+    colorPalette->addWidget(purpleColorButton,1,2,Qt::AlignCenter);
+    colorPalette->addWidget(blackColorButton,1,3,Qt::AlignCenter);
+
+    setPaletteColors();     // вызов функции установки цвета отображаемых кнопок
+
+    if(window->isVisible()){
+        hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+    }
+    else{
+        showPalette(window);    // вызов функции показа окна кнопок цветовой палитры
+    }
+
+
+}
+
+void TextEditor::hidePalette(QWidget *window){      // функция скрытия окна кнопок цветовой палитры
+    if(window !=NULL && window->isVisible())  window->hide();   // если окно видимо - скрыть
+}
+void TextEditor::showPalette(QWidget *window){      // функция показа окна кнопок цветовой палитры
+    if(window !=NULL) window->show();       // показать окно
 }
