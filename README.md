@@ -10,8 +10,6 @@
 
 Костин Максим
 
-Казьмин Александр
-
 Иванчихин Борис
 
 [Состав команды](https://docs.google.com/document/d/19z7W2ugYXgedY3DBrVBSJqiIiFxdfX9wZ2h4OkGxsAc/edit)
