@@ -11,6 +11,17 @@ TextEditor::TextEditor(QWidget *parent)
     : QMainWindow(parent), uiPtr(new Ui::TextEditor)
 {
     uiPtr->setupUi(this);
+    this->setWindowTitle("Text Editor");
+
+    QFile qssFile(":/QSS/QSS-file/WordOffice.qss");   // выбрать стиль из ресурсов
+    qssFile.open(QFile::ReadOnly);  // открыть файл только для чтения
+    if(qssFile.isOpen())
+    {
+        QString qss = QLatin1String(qssFile.readAll());
+        this->setStyleSheet(qss);   // если файл открылся установить данный стиль
+        qssFile.close();
+    }
+
     uiPtr->menubar->addMenu(menuConfig());  // добавление в menubar меню File
     uiPtr->menubar->addMenu(editMenu());    // добавление в menubar меню Edit
     uiPtr->menubar->addMenu(formatMenu());  // добавление в menubar меню Format

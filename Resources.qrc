@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/QSS">
+        <file>QSS-file/WordOffice.qss</file>
+    </qresource>
+</RCC>
