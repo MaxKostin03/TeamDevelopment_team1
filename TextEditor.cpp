@@ -6,6 +6,8 @@
 #include <QMessageBox>
 #include <QCloseEvent>
 #include <QFontDialog>
+#include <QtPrintSupport/QPrinter>
+#include <QtPrintSupport/QPrintDialog>
 
 TextEditor::TextEditor(QWidget *parent)
     : QMainWindow(parent), uiPtr(new Ui::TextEditor)
@@ -45,7 +47,7 @@ QMenu *TextEditor::menuConfig()     // заполнение меню File
     menuFilePtr->addAction(tr("Open"), this, &TextEditor::slotFileOpen);        // кнопка вызова функции открытия файла
     menuFilePtr->addAction(tr("Save"), this, &TextEditor::slotFileSave);        // кнопка вызова функции сохранения файла
     menuFilePtr->addAction(tr("Save as"), this, &TextEditor::slotFileSaveAs);   // кнопка вызова функции сохранения с новым именем файла
-    menuFilePtr->addAction(tr("Print"));
+    menuFilePtr->addAction(tr("Print"), this, &TextEditor::slotPrintFile);      // кнопка вызова функции печати файла
     menuFilePtr->addSeparator();
     menuFilePtr->addAction(tr("Exit"), this, &TextEditor::slotExitFile);        // кнопка вызова функции выхода
     return menuFilePtr;
@@ -203,7 +205,7 @@ void TextEditor::slotFileSave()     // функция сохранения фа�
     QString titleName = fileInfo.fileName();
     slotRenameTitle(titleName);     // вызов функции изменения названия файла
     QTextStream out(&file);
-    QString text = uiPtr->textEdit->toHtml(); // чтобы сохранить форматирование и изображения, мы меняем "toPlainText" yfна "toHtml"
+    QString text = uiPtr->textEdit->toHtml(); // чтобы сохранить форматирование и изображения, мы меняем "toPlainText" на "toHtml"
     out << text;
     file.flush();
     file.close();
@@ -212,7 +214,7 @@ void TextEditor::slotFileSave()     // функция сохранения фа�
 
 void TextEditor::slotFileSaveAs()       //функция сохранения с новым именем файла
 {
-    QString file_name = QFileDialog::getSaveFileName(this, "Save the file", "", "Text Files (*.txt)");  // охраняет в формате txt
+    QString file_name = QFileDialog::getSaveFileName(this, "Save the file", "", "Text Files (*.txt)");  // сохраняет в формате txt
     QFile file(file_name);
     if(!file.open(QFile::WriteOnly | QFile::Text))
     {
@@ -224,11 +226,23 @@ void TextEditor::slotFileSaveAs()       //функция сохранения с
     QString titleName = fileInfo.fileName();
     slotRenameTitle(titleName);     // вызов функции изменения названия файла
     QTextStream out(&file);
-    QString text = uiPtr->textEdit->toHtml(); // чтобы сохранить форматирование и изображения, мы меняем "toPlainText" yfна "toHtml"
+    QString text = uiPtr->textEdit->toHtml(); // чтобы сохранить форматирование и изображения, мы меняем "toPlainText" на "toHtml"
     out << text;
     file.flush();
     file.close();
     isFileSaved = true;
+}
+
+void TextEditor::slotPrintFile()        // функция печати файла
+{
+    QPrinter printer;
+    QPrintDialog dlg(&printer, this);
+    dlg.setWindowTitle("Print");
+    if (dlg.exec() != QDialog::Accepted)
+    {
+        return;     // если отмена печати - выйти из функции
+    }
+    uiPtr->textEdit->print(&printer);   // отправка на печать
 }
 
 void TextEditor::slotExitFile()     // функция выхода
