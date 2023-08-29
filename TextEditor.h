@@ -25,6 +25,7 @@ private slots:
     void slotFileOpen();
     void slotFileSave();
     void slotFileSaveAs();
+    void slotPrintFile();
     void slotExitFile();
     void slotUndo();
     void slotRedo();
