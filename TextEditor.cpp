@@ -5,11 +5,25 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include <QCloseEvent>
+#include <QFontDialog>
+#include <QtPrintSupport/QPrinter>
+#include <QtPrintSupport/QPrintDialog>
 
 TextEditor::TextEditor(QWidget *parent)
     : QMainWindow(parent), uiPtr(new Ui::TextEditor)
 {
     uiPtr->setupUi(this);
+    this->setWindowTitle("Text Editor");
+
+    QFile qssFile(":/QSS/QSS-file/WordOffice.qss");   // выбрать стиль из ресурсов
+    qssFile.open(QFile::ReadOnly);  // открыть файл только для чтения
+    if(qssFile.isOpen())
+    {
+        QString qss = QLatin1String(qssFile.readAll());
+        this->setStyleSheet(qss);   // если файл открылся установить данный стиль
+        qssFile.close();
+    }
+
     uiPtr->menubar->addMenu(menuConfig());  // добавление в menubar меню File
     uiPtr->menubar->addMenu(editMenu());    // добавление в menubar меню Edit
     uiPtr->menubar->addMenu(formatMenu());  // добавление в menubar меню Format
@@ -33,7 +47,7 @@ QMenu *TextEditor::menuConfig()     // заполнение меню File
     menuFilePtr->addAction(tr("Open"), this, &TextEditor::slotFileOpen);        // кнопка вызова функции открытия файла
     menuFilePtr->addAction(tr("Save"), this, &TextEditor::slotFileSave);        // кнопка вызова функции сохранения файла
     menuFilePtr->addAction(tr("Save as"), this, &TextEditor::slotFileSaveAs);   // кнопка вызова функции сохранения с новым именем файла
-    menuFilePtr->addAction(tr("Print"));
+    menuFilePtr->addAction(tr("Print"), this, &TextEditor::slotPrintFile);      // кнопка вызова функции печати файла
     menuFilePtr->addSeparator();
     menuFilePtr->addAction(tr("Exit"), this, &TextEditor::slotExitFile);        // кнопка вызова функции выхода
     return menuFilePtr;
@@ -61,13 +75,13 @@ QMenu *TextEditor::formatMenu()     // заполнение меню Format
     QMenu *menuFormatPtr = new QMenu(this);
     menuFormatPtr->setFont(font);
     menuFormatPtr->setTitle(tr("Format"));
-    menuFormatPtr->addAction(tr("Bold"));
-    menuFormatPtr->addAction(tr("Italic"));
-    menuFormatPtr->addAction(tr("Underline"));
-    menuFormatPtr->addAction(tr("Crossed"));
+    menuFormatPtr->addAction(tr("Bold"), this, &TextEditor::slotBold);              // кнопка вызова функции жирного шрифта
+    menuFormatPtr->addAction(tr("Italic"), this, &TextEditor::slotItalic);          // кнопка вызова функции курсивного шрифта
+    menuFormatPtr->addAction(tr("Underline"), this, &TextEditor::slotUnderlined);   // кнопка вызова функции подчеркнутого шрифта
+    menuFormatPtr->addAction(tr("Crossed"),this, &TextEditor::slotCrossedOut);      // кнопка вызова функции зачеркнутого шрифта
     menuFormatPtr->addSeparator();
-    menuFormatPtr->addAction(tr("Font style"));
-    menuFormatPtr->addAction(tr("Font color"));
+    menuFormatPtr->addAction(tr("Font style"), this, &TextEditor::slotFontStyle);   // кнопка вызова функции изменения стиля шрифта
+    menuFormatPtr->addAction(tr("Font color"), this, &TextEditor::slotFontColor);   // кнопка вызова функции изменения цвета шрифта
     return menuFormatPtr;
 }
 
@@ -77,7 +91,7 @@ QMenu *TextEditor::insertMenu()     // заполнение меню Insert
     QMenu *menuInsertPtr = new QMenu(this);
     menuInsertPtr->setFont(font);
     menuInsertPtr->setTitle(tr("Insert"));
-    menuInsertPtr->addAction(tr("Image"));
+    menuInsertPtr->addAction(tr("Image"), this, &TextEditor::slotInsertImage);  // кнопка вызова функции добавления изображения
     return menuInsertPtr;
 }
 
@@ -191,7 +205,7 @@ void TextEditor::slotFileSave()     // функция сохранения фа�
     QString titleName = fileInfo.fileName();
     slotRenameTitle(titleName);     // вызов функции изменения названия файла
     QTextStream out(&file);
-    QString text = uiPtr->textEdit->toHtml(); // чтобы сохранить форматирование и изображения, мы меняем "toPlainText" yfна "toHtml"
+    QString text = uiPtr->textEdit->toHtml(); // чтобы сохранить форматирование и изображения, мы меняем "toPlainText" на "toHtml"
     out << text;
     file.flush();
     file.close();
@@ -200,7 +214,7 @@ void TextEditor::slotFileSave()     // функция сохранения фа�
 
 void TextEditor::slotFileSaveAs()       //функция сохранения с новым именем файла
 {
-    QString file_name = QFileDialog::getSaveFileName(this, "Save the file", "", "Text Files (*.txt)");  // охраняет в формате txt
+    QString file_name = QFileDialog::getSaveFileName(this, "Save the file", "", "Text Files (*.txt)");  // сохраняет в формате txt
     QFile file(file_name);
     if(!file.open(QFile::WriteOnly | QFile::Text))
     {
@@ -212,11 +226,23 @@ void TextEditor::slotFileSaveAs()       //функция сохранения с
     QString titleName = fileInfo.fileName();
     slotRenameTitle(titleName);     // вызов функции изменения названия файла
     QTextStream out(&file);
-    QString text = uiPtr->textEdit->toHtml(); // чтобы сохранить форматирование и изображения, мы меняем "toPlainText" yfна "toHtml"
+    QString text = uiPtr->textEdit->toHtml(); // чтобы сохранить форматирование и изображения, мы меняем "toPlainText" на "toHtml"
     out << text;
     file.flush();
     file.close();
     isFileSaved = true;
+}
+
+void TextEditor::slotPrintFile()        // функция печати файла
+{
+    QPrinter printer;
+    QPrintDialog dlg(&printer, this);
+    dlg.setWindowTitle("Print");
+    if (dlg.exec() != QDialog::Accepted)
+    {
+        return;     // если отмена печати - выйти из функции
+    }
+    uiPtr->textEdit->print(&printer);   // отправка на печать
 }
 
 void TextEditor::slotExitFile()     // функция выхода
@@ -277,6 +303,85 @@ void TextEditor::slotSelectAll()        // функция выделить вс�
     uiPtr->textEdit->selectAll();
 }
 
+void TextEditor::slotBold()     // функция жирного шрифта
+{
+    if( uiPtr->textEdit->fontWeight() == QFont::Normal) {   // если текст не жирным шрифтом - делаем жирным
+        uiPtr->textEdit->setFontWeight(QFont::Bold);
+    }
+    else{                                                   // если текст жирным шрифтом - делаем не жирным
+        uiPtr->textEdit->setFontWeight(QFont::Normal);
+    }
+}
+
+void TextEditor::slotItalic()       // функциия курсивного шрифта
+{
+    if(uiPtr->textEdit->fontItalic() == false) {   // если текст не курсивным шрифтом - делаем курсив
+        uiPtr->textEdit->setFontItalic(true);
+    }
+    else{                                           // если текст курсивным шрифтом - делаем не курсивным
+        uiPtr->textEdit->setFontItalic(false);
+    }
+}
+
+void TextEditor::slotUnderlined()       // функция подчеркнутого шрифта
+{
+    if( uiPtr->textEdit->fontUnderline() == false) {    // если текст не подчерунцтым шрифтом - делаем подчеркнутым
+        uiPtr->textEdit->setFontUnderline(true);
+    }
+    else{                                               // если текст подчерунцтым шрифтом - делаем не подчеркнутым
+        uiPtr->textEdit->setFontUnderline(false);
+    }
+}
+
+void TextEditor::slotCrossedOut()       // функция зачеркинутого шрифта
+{
+    QFont font_ = uiPtr->textEdit->currentFont();
+
+    if( uiPtr->textEdit->currentFont().strikeOut() == false) {  // если текст не зачеркнутым шрифтом - делаем зачеркнутым
+        font_.setStrikeOut(true);
+        uiPtr->textEdit->setCurrentFont(font_);
+    }
+    else{                                                       // если текст зачеркнутым шрифтом - делаем не зачеркнутым
+        font_.setStrikeOut(false);
+        uiPtr->textEdit->setCurrentFont(font_);
+    }
+
+}
+
+void TextEditor::slotFontStyle()        // функция изменения стиля шрифта
+{
+    bool ok;
+    QFont font = QFontDialog::getFont(&ok, this);   // вызов программы изменения стиля шрифта
+    if (ok)
+    {
+        uiPtr->textEdit->setCurrentFont(font);      // если ОК - применить стиль
+    }
+    else return;                                    // если Cansel - выйти
+}
+
+void TextEditor::slotFontColor()        // функция изменения цвета шрифта
+{
+
+    QPoint Pos =mapFromGlobal(QCursor::pos());
+    createColorPalette(Pos.x() , Pos.y()-(uiPtr->toolBar->height()));   // вызов функции выбора цветовой палитры
+
+}
+
+void TextEditor::slotInsertImage()      // функция добавления изображения
+{
+    QString file_path = QFileDialog::getOpenFileName(this, "Open the file");
+    if (file_path.isEmpty())
+    {
+        return;             // если отменить вставку изображения - выход из функции
+    }
+
+    QTextImageFormat img_fmt;
+    img_fmt.setName(file_path);
+    img_fmt.setHeight(30);  // задание начальных размеров изображения
+    img_fmt.setWidth(30);   //
+    uiPtr->textEdit->textCursor().insertImage(img_fmt); // вставка изображения
+}
+
 bool TextEditor::hasUnsavedChanges()        // функция проверки сохранения текущего файла
 {
     if(uiPtr->textEdit->toPlainText().length() > 0 && file_path.isEmpty()) {
@@ -294,4 +399,137 @@ bool TextEditor::hasUnsavedChanges()        // функция проверки �
     QString textContent = uiPtr->textEdit->toHtml();
 
     return (textContent != fileContent);
+}
+
+void TextEditor::setPaletteColors(){        // функция установки цвета отображаемых кнопок
+
+    redColorButton->setStyleSheet("background:red;");
+    orangeColorButton->setStyleSheet("background:orange;");
+    yellowColorButton->setStyleSheet("background:yellow;");
+    greenColorButton->setStyleSheet("background:green;");
+    whiteColorButton->setStyleSheet("background:white;");
+    blueColorButton->setStyleSheet("background:blue;");
+    purpleColorButton->setStyleSheet("background:purple;");
+    blackColorButton->setStyleSheet("background:black;");
+
+
+}
+
+void TextEditor::onRedColorButtonClicked()      // функция установки красного цвета шрифта
+{
+    uiPtr->textEdit->setTextColor(Qt::red);
+    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+}
+
+
+void TextEditor::onOrangeColorButtonClicked()       // функция установки оранжевого цвета шрифта
+{
+    uiPtr->textEdit->setTextColor(QColorConstants::Svg::orange);
+    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+}
+
+
+void TextEditor::onYellowColorButtonClicked()       // функция установки желтого цвета шрифта
+{
+    uiPtr->textEdit->setTextColor(Qt::yellow);
+    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+}
+
+
+void TextEditor::onGreenColorButtonClicked()        // функция установки зеленого цвета шрифта
+{
+    uiPtr->textEdit->setTextColor(Qt::green);
+    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+}
+
+
+void TextEditor::onWhiteColorButtonClicked()        // функция установки белого цвета шрифта
+{
+    uiPtr->textEdit->setTextColor(Qt::white);
+    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+}
+
+
+void TextEditor::onBlueColorButtonClicked()     // функция установки синего цвета шрифта
+{
+    uiPtr->textEdit->setTextColor(Qt::blue);
+    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+}
+
+
+void TextEditor::onPurpleColorButtonClicked()       // функция установки пурпурного цвета шрифта
+{
+    uiPtr->textEdit->setTextColor(QColorConstants::Svg::purple);
+    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+}
+
+
+void TextEditor::onBlackColorButtonClicked()        // функция установки черного цвета шрифта
+{
+    uiPtr->textEdit->setTextColor(Qt::black);
+    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+}
+
+void TextEditor::createColorPalette(qint32 x ,qint32 y , qint32 height , qint32 width){     // функция выбора цветовой палитры
+
+    if(window == NULL)  window = new QWidget(uiPtr->centralwidget);     // создание нового окна для кнопок цветовой палитры
+    window->setMaximumSize(height,width);
+    window->setGeometry(QRect(x,y,height,width));                       // установка положения и размеров окна для кнопок цветовой палитры
+
+    redColorButton = new QPushButton(this);
+    QObject::connect(redColorButton,&QPushButton::clicked, this, &TextEditor::onRedColorButtonClicked);         // кнопка вызова функции красного цвета шрифта
+
+    orangeColorButton= new QPushButton(this);
+    QObject::connect(orangeColorButton,&QPushButton::clicked, this, &TextEditor::onOrangeColorButtonClicked);   // кнопка вызова функции оранжевого цвета шрифта
+
+    yellowColorButton= new QPushButton(this);
+    QObject::connect(yellowColorButton,&QPushButton::clicked, this, &TextEditor::onYellowColorButtonClicked);   // кнопка вызова функции желтого цвета шрифта
+
+    greenColorButton= new QPushButton(this);
+    QObject::connect(greenColorButton,&QPushButton::clicked, this, &TextEditor::onGreenColorButtonClicked);     // кнопка вызова функции зеленого цвета шрифта
+
+    whiteColorButton= new QPushButton(this);
+    QObject::connect(whiteColorButton,&QPushButton::clicked, this, &TextEditor::onWhiteColorButtonClicked);     // кнопка вызова функции белого цвета шрифта
+
+    blueColorButton= new QPushButton(this);
+    QObject::connect(blueColorButton,&QPushButton::clicked, this, &TextEditor::onBlueColorButtonClicked);       // кнопка вызова функции синего цвета шрифта
+
+    purpleColorButton= new QPushButton(this);
+    QObject::connect(purpleColorButton,&QPushButton::clicked, this, &TextEditor::onPurpleColorButtonClicked);   // кнопка вызова функции пурпурного цвета шрифта
+
+    blackColorButton= new QPushButton(this);
+    QObject::connect(blackColorButton,&QPushButton::clicked, this, &TextEditor::onBlackColorButtonClicked);     // кнопка вызова функции черного цвета шрифта
+
+
+    gridGroupBox = new QGroupBox(tr("Palette"),window);     // создание группы для обьединения кнопок окна цветовой палитры
+    colorPalette = new QGridLayout;                         // создание макета сетки для группировки кнопок окна цветовой палитры
+    gridGroupBox->setLayout(colorPalette);                  // добавление макета сетки в группу
+
+    // расстановка кнопок цветовой палитры по сетке
+    colorPalette->addWidget(redColorButton,0,0,Qt::AlignCenter);
+    colorPalette->addWidget(orangeColorButton,0,1,Qt::AlignCenter);
+    colorPalette->addWidget(yellowColorButton,0,2,Qt::AlignCenter);
+    colorPalette->addWidget(greenColorButton,0,3,Qt::AlignCenter);
+    colorPalette->addWidget(whiteColorButton,1,0,Qt::AlignCenter);
+    colorPalette->addWidget(blueColorButton,1,1,Qt::AlignCenter);
+    colorPalette->addWidget(purpleColorButton,1,2,Qt::AlignCenter);
+    colorPalette->addWidget(blackColorButton,1,3,Qt::AlignCenter);
+
+    setPaletteColors();     // вызов функции установки цвета отображаемых кнопок
+
+    if(window->isVisible()){
+        hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+    }
+    else{
+        showPalette(window);    // вызов функции показа окна кнопок цветовой палитры
+    }
+
+
+}
+
+void TextEditor::hidePalette(QWidget *window){      // функция скрытия окна кнопок цветовой палитры
+    if(window !=NULL && window->isVisible())  window->hide();   // если окно видимо - скрыть
+}
+void TextEditor::showPalette(QWidget *window){      // функция показа окна кнопок цветовой палитры
+    if(window !=NULL) window->show();       // показать окно
 }
