@@ -91,7 +91,7 @@ QMenu *TextEditor::insertMenu()     // заполнение меню Insert
     QMenu *menuInsertPtr = new QMenu(this);
     menuInsertPtr->setFont(font);
     menuInsertPtr->setTitle(tr("Insert"));
-    menuInsertPtr->addAction(tr("Image"));
+    menuInsertPtr->addAction(tr("Image"), this, &TextEditor::slotInsertImage);  // кнопка вызова функции добавления изображения
     return menuInsertPtr;
 }
 
@@ -367,6 +367,22 @@ void TextEditor::slotFontColor()        // функция изменения ц�
 
 }
 
+//T9_Add_image_insert
+void TextEditor::slotInsertImage()      // функция добавления изображения
+{
+    QString file_path = QFileDialog::getOpenFileName(this, "Open the file");
+    if (file_path.isEmpty())
+    {
+        return;             // если отменить вставку изображения - выход из функции
+    }
+
+    QTextImageFormat img_fmt;
+    img_fmt.setName(file_path);
+    img_fmt.setHeight(30);  // задание начальных размеров изображения
+    img_fmt.setWidth(30);   //
+    uiPtr->textEdit->textCursor().insertImage(img_fmt); // вставка изображения
+}
+ main
 bool TextEditor::hasUnsavedChanges()        // функция проверки сохранения текущего файла
 {
     if(uiPtr->textEdit->toPlainText().length() > 0 && file_path.isEmpty()) {

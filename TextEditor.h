@@ -39,6 +39,7 @@ private slots:
     void slotCrossedOut();
     void slotFontStyle();
     void slotFontColor();
+    void slotInsertImage();
     void closeEvent(QCloseEvent *event);
     bool hasUnsavedChanges();
 
