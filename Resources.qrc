@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/QSS">
-        <file>QSS-file/WordOffice.qss</file>
+        <file>QSS-file/DarkMode.qss</file>
+        <file>QSS-file/LightMode.qss</file>
     </qresource>
 </RCC>

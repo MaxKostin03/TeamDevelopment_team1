@@ -15,14 +15,7 @@ TextEditor::TextEditor(QWidget *parent)
     uiPtr->setupUi(this);
     this->setWindowTitle("Text Editor");
 
-    QFile qssFile(":/QSS/QSS-file/WordOffice.qss");   // выбрать стиль из ресурсов
-    qssFile.open(QFile::ReadOnly);  // открыть файл только для чтения
-    if(qssFile.isOpen())
-    {
-        QString qss = QLatin1String(qssFile.readAll());
-        this->setStyleSheet(qss);   // если файл открылся установить данный стиль
-        qssFile.close();
-    }
+    slotLightMode();
 
     uiPtr->menubar->addMenu(menuConfig());  // добавление в menubar меню File
     uiPtr->menubar->addMenu(editMenu());    // добавление в menubar меню Edit
@@ -101,8 +94,8 @@ QMenu *TextEditor::viewMenu()       // заполнение меню View
     QMenu *menuViewPtr = new QMenu(this);
     menuViewPtr->setFont(font);
     menuViewPtr->setTitle(tr("View"));
-    menuViewPtr->addAction(tr("Dark mode"));
-    menuViewPtr->addAction(tr("Light mode"));
+    menuViewPtr->addAction(tr("Dark mode"), this, &TextEditor::slotDarkMode);   // кнопка вызова функции темной темы
+    menuViewPtr->addAction(tr("Light mode"), this, &TextEditor::slotLightMode); // кнопка вызова функции светлой темы
     return menuViewPtr;
 }
 
@@ -367,7 +360,6 @@ void TextEditor::slotFontColor()        // функция изменения ц�
 
 }
 
-
 void TextEditor::slotInsertImage()      // функция добавления изображения
 {
     QString file_path = QFileDialog::getOpenFileName(this, "Open the file");
@@ -381,6 +373,30 @@ void TextEditor::slotInsertImage()      // функция добавления �
     img_fmt.setHeight(30);  // задание начальных размеров изображения
     img_fmt.setWidth(30);   //
     uiPtr->textEdit->textCursor().insertImage(img_fmt); // вставка изображения
+}
+
+void TextEditor::slotDarkMode()     // функция темной темы
+{
+    QFile qssFile(":/QSS/QSS-file/DarkMode.qss");   // выбрать стиль из ресурсов
+    qssFile.open(QFile::ReadOnly);  // открыть файл только для чтения
+    if(qssFile.isOpen())
+    {
+        QString qss = QLatin1String(qssFile.readAll());
+        this->setStyleSheet(qss);   // если файл открылся установить данный стиль
+        qssFile.close();
+    }
+}
+
+void TextEditor::slotLightMode()        // функция светлой темы
+{
+    QFile qssFile(":/QSS/QSS-file/LightMode.qss");   // выбрать стиль из ресурсов
+    qssFile.open(QFile::ReadOnly);  // открыть файл только для чтения
+    if(qssFile.isOpen())
+    {
+        QString qss = QLatin1String(qssFile.readAll());
+        this->setStyleSheet(qss);   // если файл открылся установить данный стиль
+        qssFile.close();
+    }
 }
 
 bool TextEditor::hasUnsavedChanges()        // функция проверки сохранения текущего файла
