@@ -62,6 +62,7 @@ private:
     QMenu *formatMenu();
     QMenu *insertMenu();
     QMenu *viewMenu();
+    QToolBar *toolbar();
 
     bool isFileSaved = true;
 

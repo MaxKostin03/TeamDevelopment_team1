@@ -1,6 +1,25 @@
 <RCC>
-    <qresource prefix="/QSS">
+    <qresource prefix="/res">
         <file>QSS-file/DarkMode.qss</file>
         <file>QSS-file/LightMode.qss</file>
+        <file>Icons-file/diskette.png</file>
+        <file>Icons-file/file.png</file>
+        <file>Icons-file/folder.png</file>
+        <file>Icons-file/logout.png</file>
+        <file>Icons-file/printer.png</file>
+        <file>Icons-file/save-as.png</file>
+        <file>Icons-file/checkbox.png</file>
+        <file>Icons-file/copy.png</file>
+        <file>Icons-file/paste.png</file>
+        <file>Icons-file/scissors.png</file>
+        <file>Icons-file/bold.png</file>
+        <file>Icons-file/color-text.png</file>
+        <file>Icons-file/cross-out.png</file>
+        <file>Icons-file/font-adjustment.png</file>
+        <file>Icons-file/italic.png</file>
+        <file>Icons-file/underline.png</file>
+        <file>Icons-file/file_black.png</file>
+        <file>Icons-file/file_white.png</file>
+        <file>Icons-file/insert-picture-icon.png</file>
     </qresource>
 </RCC>
