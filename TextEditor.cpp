@@ -22,6 +22,7 @@ TextEditor::TextEditor(QWidget *parent)
     uiPtr->menubar->addMenu(formatMenu());  // добавление в menubar меню Format
     uiPtr->menubar->addMenu(insertMenu());  // добавление в menubar меню Insert
     uiPtr->menubar->addMenu(viewMenu());    // добавление в menubar меню View
+    uiPtr->toolBar->addWidget(toolbar());   // добавление в toolbar блока кнопок управления
 
 }
 
@@ -36,13 +37,13 @@ QMenu *TextEditor::menuConfig()     // заполнение меню File
     QMenu *menuFilePtr = new QMenu(this);
     menuFilePtr->setFont(font);
     menuFilePtr->setTitle(tr("File"));
-    menuFilePtr->addAction(tr("New"), this, &TextEditor::slotFileNew);          // кнопка вызова функции создания нового файла
-    menuFilePtr->addAction(tr("Open"), this, &TextEditor::slotFileOpen);        // кнопка вызова функции открытия файла
-    menuFilePtr->addAction(tr("Save"), this, &TextEditor::slotFileSave);        // кнопка вызова функции сохранения файла
-    menuFilePtr->addAction(tr("Save as"), this, &TextEditor::slotFileSaveAs);   // кнопка вызова функции сохранения с новым именем файла
-    menuFilePtr->addAction(tr("Print"), this, &TextEditor::slotPrintFile);      // кнопка вызова функции печати файла
+    menuFilePtr->addAction(tr("New"), this, &TextEditor::slotFileNew)->setIcon(QIcon(":/res/Icons-file/file"));              // кнопка вызова функции создания нового файла
+    menuFilePtr->addAction(tr("Open"), this, &TextEditor::slotFileOpen)->setIcon(QIcon(":/res/Icons-file/folder"));          // кнопка вызова функции открытия файла
+    menuFilePtr->addAction(tr("Save"), this, &TextEditor::slotFileSave)->setIcon(QIcon(":/res/Icons-file/diskette"));        // кнопка вызова функции сохранения файла
+    menuFilePtr->addAction(tr("Save as"), this, &TextEditor::slotFileSaveAs)->setIcon(QIcon(":/res/Icons-file/save-as"));    // кнопка вызова функции сохранения с новым именем файла
+    menuFilePtr->addAction(tr("Print"), this, &TextEditor::slotPrintFile)->setIcon(QIcon(":/res/Icons-file/printer"));       // кнопка вызова функции печати файла
     menuFilePtr->addSeparator();
-    menuFilePtr->addAction(tr("Exit"), this, &TextEditor::slotExitFile);        // кнопка вызова функции выхода
+    menuFilePtr->addAction(tr("Exit"), this, &TextEditor::slotExitFile)->setIcon(QIcon(":/res/Icons-file/logout"));          // кнопка вызова функции выхода
     return menuFilePtr;
 }
 
@@ -54,11 +55,11 @@ QMenu *TextEditor::editMenu()       // заполнение меню Edit
     menuEditPtr->setTitle(tr("Edit"));
     menuEditPtr->addAction(tr("Undo"), this, &TextEditor::slotUndo);            // кнопка вызова функции отмены действия
     menuEditPtr->addAction(tr("Redo"), this, &TextEditor::slotRedo);            // кнопка вызова функции повтора действия
-    menuEditPtr->addAction(tr("Copy"), this, &TextEditor::slotCopy);            // кнопка вызова функции копирования
-    menuEditPtr->addAction(tr("Cut"), this, &TextEditor::slotCut);              // кнопка вызова функции вырезать
-    menuEditPtr->addAction(tr("Paste"), this, &TextEditor::slotPaste);          // кнопка вызова функции вставить
+    menuEditPtr->addAction(tr("Copy"), this, &TextEditor::slotCopy)->setIcon(QIcon(":/res/Icons-file/copy"));                // кнопка вызова функции копирования
+    menuEditPtr->addAction(tr("Cut"), this, &TextEditor::slotCut)->setIcon(QIcon(":/res/Icons-file/scissors"));              // кнопка вызова функции вырезать
+    menuEditPtr->addAction(tr("Paste"), this, &TextEditor::slotPaste)->setIcon(QIcon(":/res/Icons-file/paste"));             // кнопка вызова функции вставить
     menuEditPtr->addSeparator();
-    menuEditPtr->addAction(tr("Select All"), this, &TextEditor::slotSelectAll); // кнопка вызова функции выделить все
+    menuEditPtr->addAction(tr("Select All"), this, &TextEditor::slotSelectAll)->setIcon(QIcon(":/res/Icons-file/checkbox")); // кнопка вызова функции выделить все
     return menuEditPtr;
 }
 
@@ -68,13 +69,13 @@ QMenu *TextEditor::formatMenu()     // заполнение меню Format
     QMenu *menuFormatPtr = new QMenu(this);
     menuFormatPtr->setFont(font);
     menuFormatPtr->setTitle(tr("Format"));
-    menuFormatPtr->addAction(tr("Bold"), this, &TextEditor::slotBold);              // кнопка вызова функции жирного шрифта
-    menuFormatPtr->addAction(tr("Italic"), this, &TextEditor::slotItalic);          // кнопка вызова функции курсивного шрифта
-    menuFormatPtr->addAction(tr("Underline"), this, &TextEditor::slotUnderlined);   // кнопка вызова функции подчеркнутого шрифта
-    menuFormatPtr->addAction(tr("Crossed"),this, &TextEditor::slotCrossedOut);      // кнопка вызова функции зачеркнутого шрифта
+    menuFormatPtr->addAction(tr("Bold"), this, &TextEditor::slotBold)->setIcon(QIcon(":/res/Icons-file/bold"));                          // кнопка вызова функции жирного шрифта
+    menuFormatPtr->addAction(tr("Italic"), this, &TextEditor::slotItalic)->setIcon(QIcon(":/res/Icons-file/italic"));                    // кнопка вызова функции курсивного шрифта
+    menuFormatPtr->addAction(tr("Underline"), this, &TextEditor::slotUnderlined)->setIcon(QIcon(":/res/Icons-file/underline"));          // кнопка вызова функции подчеркнутого шрифта
+    menuFormatPtr->addAction(tr("Crossed"),this, &TextEditor::slotCrossedOut)->setIcon(QIcon(":/res/Icons-file/cross-out"));             // кнопка вызова функции зачеркнутого шрифта
     menuFormatPtr->addSeparator();
-    menuFormatPtr->addAction(tr("Font style"), this, &TextEditor::slotFontStyle);   // кнопка вызова функции изменения стиля шрифта
-    menuFormatPtr->addAction(tr("Font color"), this, &TextEditor::slotFontColor);   // кнопка вызова функции изменения цвета шрифта
+    menuFormatPtr->addAction(tr("Font style"), this, &TextEditor::slotFontStyle)->setIcon(QIcon(":/res/Icons-file/font-adjustment"));    // кнопка вызова функции изменения стиля шрифта
+    menuFormatPtr->addAction(tr("Font color"), this, &TextEditor::slotFontColor)->setIcon(QIcon(":/res/Icons-file/color-text"));         // кнопка вызова функции изменения цвета шрифта
     return menuFormatPtr;
 }
 
@@ -84,7 +85,7 @@ QMenu *TextEditor::insertMenu()     // заполнение меню Insert
     QMenu *menuInsertPtr = new QMenu(this);
     menuInsertPtr->setFont(font);
     menuInsertPtr->setTitle(tr("Insert"));
-    menuInsertPtr->addAction(tr("Image"), this, &TextEditor::slotInsertImage);  // кнопка вызова функции добавления изображения
+    menuInsertPtr->addAction(tr("Image"), this, &TextEditor::slotInsertImage)->setIcon(QIcon(":/res/Icons-file/insert-picture-icon"));  // кнопка вызова функции добавления изображения
     return menuInsertPtr;
 }
 
@@ -94,9 +95,77 @@ QMenu *TextEditor::viewMenu()       // заполнение меню View
     QMenu *menuViewPtr = new QMenu(this);
     menuViewPtr->setFont(font);
     menuViewPtr->setTitle(tr("View"));
-    menuViewPtr->addAction(tr("Dark mode"), this, &TextEditor::slotDarkMode);   // кнопка вызова функции темной темы
-    menuViewPtr->addAction(tr("Light mode"), this, &TextEditor::slotLightMode); // кнопка вызова функции светлой темы
+    menuViewPtr->addAction(tr("Dark mode"), this, &TextEditor::slotDarkMode)->setIcon(QIcon(":/res/Icons-file/file_black"));    // кнопка вызова функции темной темы
+    menuViewPtr->addAction(tr("Light mode"), this, &TextEditor::slotLightMode)->setIcon(QIcon(":/res/Icons-file/file_white"));  // кнопка вызова функции светлой темы
     return menuViewPtr;
+}
+
+QToolBar *TextEditor::toolbar()     // заполнение в toolbar блока кнопок управления
+{
+    QToolBar *toolbar = new QToolBar(this);
+
+    QAction *newdoc = toolbar->addAction(QIcon(":/res/Icons-file/file"), "New document");           // кнопка вызова функции создания нового файла
+    connect(newdoc, &QAction::triggered, this, &TextEditor::slotFileNew);
+
+    QAction *open = toolbar->addAction(QIcon(":/res/Icons-file/folder"), "Open file");              // кнопка вызова функции открытия файла
+    connect(open, &QAction::triggered, this, &TextEditor::slotFileOpen);
+
+    QAction *save = toolbar->addAction(QIcon(":/res/Icons-file/diskette"), "Save file");            // кнопка вызова функции сохранения файла
+    connect(save, &QAction::triggered, this, &TextEditor::slotFileSave);
+
+    QAction *save_as = toolbar->addAction(QIcon(":/res/Icons-file/save-as"), "Save file as");       // кнопка вызова функции сохранения с новым именем файла
+    connect(save_as, &QAction::triggered, this, &TextEditor::slotFileSaveAs);
+
+    QAction *printdoc = toolbar->addAction(QIcon(":/res/Icons-file/printer"), "Print document");    // кнопка вызова функции печати файла
+    connect(printdoc, &QAction::triggered, this, &TextEditor::slotPrintFile);
+
+    toolbar->addSeparator();
+
+    QAction *copy = toolbar->addAction(QIcon(":/res/Icons-file/copy"), "Copy");     // кнопка вызова функции копирования
+    connect(copy, &QAction::triggered, this, &TextEditor::slotCopy);
+
+    QAction *cut = toolbar->addAction(QIcon(":/res/Icons-file/scissors"), "Cut");   // кнопка вызова функции вырезать
+    connect(cut, &QAction::triggered, this, &TextEditor::slotCut);
+
+    QAction *paste = toolbar->addAction(QIcon(":/res/Icons-file/paste"), "Paste");  // кнопка вызова функции вставить
+    connect(paste, &QAction::triggered, this, &TextEditor::slotPaste);
+
+    toolbar->addSeparator();
+
+    QAction *bold = toolbar->addAction(QIcon(":/res/Icons-file/bold"), "Bold");                                 // кнопка вызова функции жирного шрифта
+    connect(bold, &QAction::triggered, this, &TextEditor::slotBold);
+    bold->setStatusTip("При выделении текста справа налево текст меняется только один раз при нажатии. "
+                   "При выделении слева направо, текст меняется каждый раз.");
+
+    QAction *italic = toolbar->addAction(QIcon(":/res/Icons-file/italic"), "Italic");                           // кнопка вызова функции курсивного шрифта
+    connect(italic, &QAction::triggered, this, &TextEditor::slotItalic);
+    italic->setStatusTip("При выделении текста справа налево текст меняется только один раз при нажатии. "
+                   "При выделении слева направо, текст меняется каждый раз.");
+
+    QAction *underlined = toolbar->addAction(QIcon(":/res/Icons-file/underline"), "Underlined");                // кнопка вызова функции подчеркнутого шрифта
+    connect(underlined, &QAction::triggered, this, &TextEditor::slotUnderlined);
+    underlined->setStatusTip("При выделении текста справа налево текст меняется только один раз при нажатии. "
+                   "При выделении слева направо, текст меняется каждый раз.");
+
+    QAction *crossedOut = toolbar->addAction(QIcon(":/res/Icons-file/cross-out"), "Cross");                     // кнопка вызова функции зачеркнутого шрифта
+    connect(crossedOut, &QAction::triggered, this, &TextEditor::slotCrossedOut);
+    crossedOut->setStatusTip("При выделении текста справа налево текст меняется только один раз при нажатии. "
+                             "При выделении слева направо, текст меняется каждый раз.");
+
+    toolbar->addSeparator();
+
+    QAction *font_style = toolbar->addAction(QIcon(":/res/Icons-file/font-adjustment"), "Font style");      // кнопка вызова функции изменения стиля шрифта
+    connect(font_style, &QAction::triggered, this, &TextEditor::slotFontStyle);
+
+    QAction *font_color = toolbar->addAction(QIcon(":/res/Icons-file/color-text"), "Font color");           // кнопка вызова функции изменения цвета шрифта
+    connect(font_color, &QAction::triggered, this, &TextEditor::slotFontColor);
+
+    toolbar->addSeparator();
+
+    QAction *iamge = toolbar->addAction(QIcon(":/res/Icons-file/insert-picture-icon"), "Insert image");     // кнопка вызова функции добавления изображения
+    connect(iamge, &QAction::triggered, this, &TextEditor::slotInsertImage);
+
+    return toolbar;
 }
 
 void TextEditor::slotRenameTitle(QString newName)       // функция изменения названия файла
@@ -377,7 +446,7 @@ void TextEditor::slotInsertImage()      // функция добавления �
 
 void TextEditor::slotDarkMode()     // функция темной темы
 {
-    QFile qssFile(":/QSS/QSS-file/DarkMode.qss");   // выбрать стиль из ресурсов
+    QFile qssFile(":/res/QSS-file/DarkMode.qss");   // выбрать стиль из ресурсов
     qssFile.open(QFile::ReadOnly);  // открыть файл только для чтения
     if(qssFile.isOpen())
     {
@@ -389,7 +458,7 @@ void TextEditor::slotDarkMode()     // функция темной темы
 
 void TextEditor::slotLightMode()        // функция светлой темы
 {
-    QFile qssFile(":/QSS/QSS-file/LightMode.qss");   // выбрать стиль из ресурсов
+    QFile qssFile(":/res/QSS-file/LightMode.qss");   // выбрать стиль из ресурсов
     qssFile.open(QFile::ReadOnly);  // открыть файл только для чтения
     if(qssFile.isOpen())
     {
