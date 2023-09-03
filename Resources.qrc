@@ -21,5 +21,7 @@
         <file>Icons-file/file_black.png</file>
         <file>Icons-file/file_white.png</file>
         <file>Icons-file/insert-picture-icon.png</file>
+        <file>Icons-file/forward.png</file>
+        <file>Icons-file/turn-left.png</file>
     </qresource>
 </RCC>

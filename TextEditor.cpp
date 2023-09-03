@@ -53,13 +53,13 @@ QMenu *TextEditor::editMenu()       // заполнение меню Edit
     QMenu *menuEditPtr = new QMenu(this);
     menuEditPtr->setFont(font);
     menuEditPtr->setTitle(tr("Edit"));
-    menuEditPtr->addAction(tr("Undo"), this, &TextEditor::slotUndo);            // кнопка вызова функции отмены действия
-    menuEditPtr->addAction(tr("Redo"), this, &TextEditor::slotRedo);            // кнопка вызова функции повтора действия
-    menuEditPtr->addAction(tr("Copy"), this, &TextEditor::slotCopy)->setIcon(QIcon(":/res/Icons-file/copy"));                // кнопка вызова функции копирования
-    menuEditPtr->addAction(tr("Cut"), this, &TextEditor::slotCut)->setIcon(QIcon(":/res/Icons-file/scissors"));              // кнопка вызова функции вырезать
-    menuEditPtr->addAction(tr("Paste"), this, &TextEditor::slotPaste)->setIcon(QIcon(":/res/Icons-file/paste"));             // кнопка вызова функции вставить
+    menuEditPtr->addAction(tr("Undo"), this, &TextEditor::slotUndo)->setIcon(QIcon(":/res/Icons-file/turn-left"));              // кнопка вызова функции отмены действия
+    menuEditPtr->addAction(tr("Redo"), this, &TextEditor::slotRedo)->setIcon(QIcon(":/res/Icons-file/forward"));                // кнопка вызова функции повтора действия
+    menuEditPtr->addAction(tr("Copy"), this, &TextEditor::slotCopy)->setIcon(QIcon(":/res/Icons-file/copy"));                   // кнопка вызова функции копирования
+    menuEditPtr->addAction(tr("Cut"), this, &TextEditor::slotCut)->setIcon(QIcon(":/res/Icons-file/scissors"));                 // кнопка вызова функции вырезать
+    menuEditPtr->addAction(tr("Paste"), this, &TextEditor::slotPaste)->setIcon(QIcon(":/res/Icons-file/paste"));                // кнопка вызова функции вставить
     menuEditPtr->addSeparator();
-    menuEditPtr->addAction(tr("Select All"), this, &TextEditor::slotSelectAll)->setIcon(QIcon(":/res/Icons-file/checkbox")); // кнопка вызова функции выделить все
+    menuEditPtr->addAction(tr("Select All"), this, &TextEditor::slotSelectAll)->setIcon(QIcon(":/res/Icons-file/checkbox"));    // кнопка вызова функции выделить все
     return menuEditPtr;
 }
 
@@ -121,13 +121,19 @@ QToolBar *TextEditor::toolbar()     // заполнение в toolbar блок�
 
     toolbar->addSeparator();
 
-    QAction *copy = toolbar->addAction(QIcon(":/res/Icons-file/copy"), "Copy");     // кнопка вызова функции копирования
+    QAction *undo = toolbar->addAction(QIcon(":/res/Icons-file/turn-left"), "Undo");    // кнопка вызова функции отмены действия
+    connect(undo, &QAction::triggered, this, &TextEditor::slotUndo);
+
+    QAction *redo = toolbar->addAction(QIcon(":/res/Icons-file/forward"), "Redo");      // кнопка вызова функции повтора действия
+    connect(redo, &QAction::triggered, this, &TextEditor::slotRedo);
+
+    QAction *copy = toolbar->addAction(QIcon(":/res/Icons-file/copy"), "Copy");         // кнопка вызова функции копирования
     connect(copy, &QAction::triggered, this, &TextEditor::slotCopy);
 
-    QAction *cut = toolbar->addAction(QIcon(":/res/Icons-file/scissors"), "Cut");   // кнопка вызова функции вырезать
+    QAction *cut = toolbar->addAction(QIcon(":/res/Icons-file/scissors"), "Cut");       // кнопка вызова функции вырезать
     connect(cut, &QAction::triggered, this, &TextEditor::slotCut);
 
-    QAction *paste = toolbar->addAction(QIcon(":/res/Icons-file/paste"), "Paste");  // кнопка вызова функции вставить
+    QAction *paste = toolbar->addAction(QIcon(":/res/Icons-file/paste"), "Paste");      // кнопка вызова функции вставить
     connect(paste, &QAction::triggered, this, &TextEditor::slotPaste);
 
     toolbar->addSeparator();
