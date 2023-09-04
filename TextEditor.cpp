@@ -37,13 +37,13 @@ QMenu *TextEditor::menuConfig()     // заполнение меню File
     QMenu *menuFilePtr = new QMenu(this);
     menuFilePtr->setFont(font);
     menuFilePtr->setTitle(tr("File"));
-    menuFilePtr->addAction(tr("New"), this, &TextEditor::slotFileNew)->setIcon(QIcon(":/res/Icons-file/file"));              // кнопка вызова функции создания нового файла
-    menuFilePtr->addAction(tr("Open"), this, &TextEditor::slotFileOpen)->setIcon(QIcon(":/res/Icons-file/folder"));          // кнопка вызова функции открытия файла
-    menuFilePtr->addAction(tr("Save"), this, &TextEditor::slotFileSave)->setIcon(QIcon(":/res/Icons-file/diskette"));        // кнопка вызова функции сохранения файла
-    menuFilePtr->addAction(tr("Save as"), this, &TextEditor::slotFileSaveAs)->setIcon(QIcon(":/res/Icons-file/save-as"));    // кнопка вызова функции сохранения с новым именем файла
-    menuFilePtr->addAction(tr("Print"), this, &TextEditor::slotPrintFile)->setIcon(QIcon(":/res/Icons-file/printer"));       // кнопка вызова функции печати файла
+    menuFilePtr->addAction(tr("New"), this, &TextEditor::slotFileNew, QKeySequence::New)->setIcon(QIcon(":/res/Icons-file/file"));              // кнопка вызова функции создания нового файла (Ctrl+N)
+    menuFilePtr->addAction(tr("Open"), this, &TextEditor::slotFileOpen, QKeySequence::Open)->setIcon(QIcon(":/res/Icons-file/folder"));         // кнопка вызова функции открытия файла (Ctrl+O)
+    menuFilePtr->addAction(tr("Save"), this, &TextEditor::slotFileSave, QKeySequence::Save)->setIcon(QIcon(":/res/Icons-file/diskette"));       // кнопка вызова функции сохранения файла (Ctrl+S)
+    menuFilePtr->addAction(tr("Save as"), this, &TextEditor::slotFileSaveAs, QKeySequence(tr("Ctrl+Shift+S")))->setIcon(QIcon(":/res/Icons-file/save-as")); // кнопка вызова функции сохранения с новым именем файла (Ctrl+Shift+S)
+    menuFilePtr->addAction(tr("Print"), this, &TextEditor::slotPrintFile, QKeySequence::Print)->setIcon(QIcon(":/res/Icons-file/printer"));     // кнопка вызова функции печати файла (Ctrl+P)
     menuFilePtr->addSeparator();
-    menuFilePtr->addAction(tr("Exit"), this, &TextEditor::slotExitFile)->setIcon(QIcon(":/res/Icons-file/logout"));          // кнопка вызова функции выхода
+    menuFilePtr->addAction(tr("Exit"), this, &TextEditor::slotExitFile, QKeySequence::Close)->setIcon(QIcon(":/res/Icons-file/logout"));        // кнопка вызова функции выхода (Ctrl+F4)
     return menuFilePtr;
 }
 
@@ -53,13 +53,13 @@ QMenu *TextEditor::editMenu()       // заполнение меню Edit
     QMenu *menuEditPtr = new QMenu(this);
     menuEditPtr->setFont(font);
     menuEditPtr->setTitle(tr("Edit"));
-    menuEditPtr->addAction(tr("Undo"), this, &TextEditor::slotUndo)->setIcon(QIcon(":/res/Icons-file/turn-left"));              // кнопка вызова функции отмены действия
-    menuEditPtr->addAction(tr("Redo"), this, &TextEditor::slotRedo)->setIcon(QIcon(":/res/Icons-file/forward"));                // кнопка вызова функции повтора действия
-    menuEditPtr->addAction(tr("Copy"), this, &TextEditor::slotCopy)->setIcon(QIcon(":/res/Icons-file/copy"));                   // кнопка вызова функции копирования
-    menuEditPtr->addAction(tr("Cut"), this, &TextEditor::slotCut)->setIcon(QIcon(":/res/Icons-file/scissors"));                 // кнопка вызова функции вырезать
-    menuEditPtr->addAction(tr("Paste"), this, &TextEditor::slotPaste)->setIcon(QIcon(":/res/Icons-file/paste"));                // кнопка вызова функции вставить
+    menuEditPtr->addAction(tr("Undo"), this, &TextEditor::slotUndo, QKeySequence::Undo)->setIcon(QIcon(":/res/Icons-file/turn-left"));                  // кнопка вызова функции отмены действия (Ctrl+Z)
+    menuEditPtr->addAction(tr("Redo"), this, &TextEditor::slotRedo, QKeySequence::Redo)->setIcon(QIcon(":/res/Icons-file/forward"));                    // кнопка вызова функции повтора действия (Ctrl+Y)
+    menuEditPtr->addAction(tr("Copy"), this, &TextEditor::slotCopy, QKeySequence::Copy)->setIcon(QIcon(":/res/Icons-file/copy"));                       // кнопка вызова функции копирования (Ctrl+C)
+    menuEditPtr->addAction(tr("Cut"), this, &TextEditor::slotCut, QKeySequence::Cut)->setIcon(QIcon(":/res/Icons-file/scissors"));                      // кнопка вызова функции вырезать (Ctrl+X)
+    menuEditPtr->addAction(tr("Paste"), this, &TextEditor::slotPaste, QKeySequence::Paste)->setIcon(QIcon(":/res/Icons-file/paste"));                   // кнопка вызова функции вставить (Ctrl+V)
     menuEditPtr->addSeparator();
-    menuEditPtr->addAction(tr("Select All"), this, &TextEditor::slotSelectAll)->setIcon(QIcon(":/res/Icons-file/checkbox"));    // кнопка вызова функции выделить все
+    menuEditPtr->addAction(tr("Select All"), this, &TextEditor::slotSelectAll, QKeySequence::SelectAll)->setIcon(QIcon(":/res/Icons-file/checkbox"));   // кнопка вызова функции выделить все (Ctrl+A)
     return menuEditPtr;
 }
 
@@ -69,9 +69,9 @@ QMenu *TextEditor::formatMenu()     // заполнение меню Format
     QMenu *menuFormatPtr = new QMenu(this);
     menuFormatPtr->setFont(font);
     menuFormatPtr->setTitle(tr("Format"));
-    menuFormatPtr->addAction(tr("Bold"), this, &TextEditor::slotBold)->setIcon(QIcon(":/res/Icons-file/bold"));                          // кнопка вызова функции жирного шрифта
-    menuFormatPtr->addAction(tr("Italic"), this, &TextEditor::slotItalic)->setIcon(QIcon(":/res/Icons-file/italic"));                    // кнопка вызова функции курсивного шрифта
-    menuFormatPtr->addAction(tr("Underline"), this, &TextEditor::slotUnderlined)->setIcon(QIcon(":/res/Icons-file/underline"));          // кнопка вызова функции подчеркнутого шрифта
+    menuFormatPtr->addAction(tr("Bold"), this, &TextEditor::slotBold, QKeySequence::Bold)->setIcon(QIcon(":/res/Icons-file/bold"));                         // кнопка вызова функции жирного шрифта (Ctrl+B)
+    menuFormatPtr->addAction(tr("Italic"), this, &TextEditor::slotItalic, QKeySequence::Italic)->setIcon(QIcon(":/res/Icons-file/italic"));                 // кнопка вызова функции курсивного шрифта (Ctrl+I)
+    menuFormatPtr->addAction(tr("Underline"), this, &TextEditor::slotUnderlined, QKeySequence::Underline)->setIcon(QIcon(":/res/Icons-file/underline"));    // кнопка вызова функции подчеркнутого шрифта (Ctrl+U)
     menuFormatPtr->addAction(tr("Crossed"),this, &TextEditor::slotCrossedOut)->setIcon(QIcon(":/res/Icons-file/cross-out"));             // кнопка вызова функции зачеркнутого шрифта
     menuFormatPtr->addSeparator();
     menuFormatPtr->addAction(tr("Font style"), this, &TextEditor::slotFontStyle)->setIcon(QIcon(":/res/Icons-file/font-adjustment"));    // кнопка вызова функции изменения стиля шрифта
