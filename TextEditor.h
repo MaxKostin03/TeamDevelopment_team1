@@ -25,6 +25,7 @@ private slots:
     void slotFileOpen();
     void slotFileSave();
     void slotFileSaveAs();
+    void slotPrintFile();
     void slotExitFile();
     void slotUndo();
     void slotRedo();
@@ -38,6 +39,9 @@ private slots:
     void slotCrossedOut();
     void slotFontStyle();
     void slotFontColor();
+    void slotInsertImage();
+    void slotDarkMode();
+    void slotLightMode();
     void closeEvent(QCloseEvent *event);
     bool hasUnsavedChanges();
 
@@ -58,6 +62,7 @@ private:
     QMenu *formatMenu();
     QMenu *insertMenu();
     QMenu *viewMenu();
+    QToolBar *toolbar();
 
     bool isFileSaved = true;
 
