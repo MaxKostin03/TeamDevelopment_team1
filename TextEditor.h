@@ -6,6 +6,7 @@
 #include <QPushButton>
 #include <QGroupBox>
 #include <QGridLayout>
+#include <QTranslator>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class TextEditor; }
@@ -42,6 +43,8 @@ private slots:
     void slotInsertImage();
     void slotDarkMode();
     void slotLightMode();
+    void slotEnglish();
+    void slotRussian();
     void closeEvent(QCloseEvent *event);
     bool hasUnsavedChanges();
 
@@ -62,6 +65,7 @@ private:
     QMenu *formatMenu();
     QMenu *insertMenu();
     QMenu *viewMenu();
+    QMenu *languageMenu();
     QToolBar *toolbar();
 
     bool isFileSaved = true;
@@ -82,5 +86,7 @@ private:
     void createColorPalette(qint32 x ,qint32 y , qint32 width=200 , qint32 height=100);
     void hidePalette(QWidget *window);
     void showPalette(QWidget *window);
+
+    QTranslator qtLanguageTranslator;
 };
 #endif // TEXTEDITOR_H

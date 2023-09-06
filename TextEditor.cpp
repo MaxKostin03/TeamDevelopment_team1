@@ -13,15 +13,17 @@ TextEditor::TextEditor(QWidget *parent)
     : QMainWindow(parent), uiPtr(new Ui::TextEditor)
 {
     uiPtr->setupUi(this);
-    this->setWindowTitle("Text Editor");
+    this->setWindowTitle(tr("Text Editor"));
 
     slotLightMode();
+    qtLanguageTranslator.load(":/QtLanguage_ru.qm", ".");
 
     uiPtr->menubar->addMenu(menuConfig());  // добавление в menubar меню File
     uiPtr->menubar->addMenu(editMenu());    // добавление в menubar меню Edit
     uiPtr->menubar->addMenu(formatMenu());  // добавление в menubar меню Format
     uiPtr->menubar->addMenu(insertMenu());  // добавление в menubar меню Insert
     uiPtr->menubar->addMenu(viewMenu());    // добавление в menubar меню View
+    uiPtr->menubar->addMenu(languageMenu());// добавление в menubar меню Language
     uiPtr->toolBar->addWidget(toolbar());   // добавление в toolbar блока кнопок управления
 
 }
@@ -100,75 +102,85 @@ QMenu *TextEditor::viewMenu()       // заполнение меню View
     return menuViewPtr;
 }
 
+QMenu *TextEditor::languageMenu()       // заполнение меню Language
+{
+    QFont font("Corbel", 10);
+    QMenu *menuLanguagePtr = new QMenu(this);
+    menuLanguagePtr->setTitle(tr("Language"));
+    menuLanguagePtr->addAction(tr("English"), this, &TextEditor::slotEnglish);    // кнопка вызова функции английского языка
+    menuLanguagePtr->addAction(tr("Russian"), this, &TextEditor::slotRussian);  // кнопка вызова функции русского языка
+    return menuLanguagePtr;
+}
+
 QToolBar *TextEditor::toolbar()     // заполнение в toolbar блока кнопок управления
 {
     QToolBar *toolbar = new QToolBar(this);
 
-    QAction *newdoc = toolbar->addAction(QIcon(":/res/Icons-file/file"), "New document");           // кнопка вызова функции создания нового файла
+    QAction *newdoc = toolbar->addAction(QIcon(":/res/Icons-file/file"), tr("New document"));           // кнопка вызова функции создания нового файла
     connect(newdoc, &QAction::triggered, this, &TextEditor::slotFileNew);
 
-    QAction *open = toolbar->addAction(QIcon(":/res/Icons-file/folder"), "Open file");              // кнопка вызова функции открытия файла
+    QAction *open = toolbar->addAction(QIcon(":/res/Icons-file/folder"), tr("Open file"));              // кнопка вызова функции открытия файла
     connect(open, &QAction::triggered, this, &TextEditor::slotFileOpen);
 
-    QAction *save = toolbar->addAction(QIcon(":/res/Icons-file/diskette"), "Save file");            // кнопка вызова функции сохранения файла
+    QAction *save = toolbar->addAction(QIcon(":/res/Icons-file/diskette"), tr("Save file"));            // кнопка вызова функции сохранения файла
     connect(save, &QAction::triggered, this, &TextEditor::slotFileSave);
 
-    QAction *save_as = toolbar->addAction(QIcon(":/res/Icons-file/save-as"), "Save file as");       // кнопка вызова функции сохранения с новым именем файла
+    QAction *save_as = toolbar->addAction(QIcon(":/res/Icons-file/save-as"), tr("Save file as"));       // кнопка вызова функции сохранения с новым именем файла
     connect(save_as, &QAction::triggered, this, &TextEditor::slotFileSaveAs);
 
-    QAction *printdoc = toolbar->addAction(QIcon(":/res/Icons-file/printer"), "Print document");    // кнопка вызова функции печати файла
+    QAction *printdoc = toolbar->addAction(QIcon(":/res/Icons-file/printer"), tr("Print document"));    // кнопка вызова функции печати файла
     connect(printdoc, &QAction::triggered, this, &TextEditor::slotPrintFile);
 
     toolbar->addSeparator();
 
-    QAction *undo = toolbar->addAction(QIcon(":/res/Icons-file/turn-left"), "Undo");    // кнопка вызова функции отмены действия
+    QAction *undo = toolbar->addAction(QIcon(":/res/Icons-file/turn-left"), tr("Undo"));    // кнопка вызова функции отмены действия
     connect(undo, &QAction::triggered, this, &TextEditor::slotUndo);
 
-    QAction *redo = toolbar->addAction(QIcon(":/res/Icons-file/forward"), "Redo");      // кнопка вызова функции повтора действия
+    QAction *redo = toolbar->addAction(QIcon(":/res/Icons-file/forward"), tr("Redo"));      // кнопка вызова функции повтора действия
     connect(redo, &QAction::triggered, this, &TextEditor::slotRedo);
 
-    QAction *copy = toolbar->addAction(QIcon(":/res/Icons-file/copy"), "Copy");         // кнопка вызова функции копирования
+    QAction *copy = toolbar->addAction(QIcon(":/res/Icons-file/copy"), tr("Copy"));         // кнопка вызова функции копирования
     connect(copy, &QAction::triggered, this, &TextEditor::slotCopy);
 
-    QAction *cut = toolbar->addAction(QIcon(":/res/Icons-file/scissors"), "Cut");       // кнопка вызова функции вырезать
+    QAction *cut = toolbar->addAction(QIcon(":/res/Icons-file/scissors"), tr("Cut"));       // кнопка вызова функции вырезать
     connect(cut, &QAction::triggered, this, &TextEditor::slotCut);
 
-    QAction *paste = toolbar->addAction(QIcon(":/res/Icons-file/paste"), "Paste");      // кнопка вызова функции вставить
+    QAction *paste = toolbar->addAction(QIcon(":/res/Icons-file/paste"), tr("Paste"));      // кнопка вызова функции вставить
     connect(paste, &QAction::triggered, this, &TextEditor::slotPaste);
 
     toolbar->addSeparator();
 
-    QAction *bold = toolbar->addAction(QIcon(":/res/Icons-file/bold"), "Bold");                                 // кнопка вызова функции жирного шрифта
+    QAction *bold = toolbar->addAction(QIcon(":/res/Icons-file/bold"), tr("Bold"));                                 // кнопка вызова функции жирного шрифта
     connect(bold, &QAction::triggered, this, &TextEditor::slotBold);
-    bold->setStatusTip("При выделении текста справа налево текст меняется только один раз при нажатии. "
-                   "При выделении слева направо, текст меняется каждый раз.");
+    bold->setStatusTip(tr("When selecting text from right to left, the text changes only once when clicked. "
+                          "When you select from left to right, the text changes every time."));
 
-    QAction *italic = toolbar->addAction(QIcon(":/res/Icons-file/italic"), "Italic");                           // кнопка вызова функции курсивного шрифта
+    QAction *italic = toolbar->addAction(QIcon(":/res/Icons-file/italic"), tr("Italic"));                           // кнопка вызова функции курсивного шрифта
     connect(italic, &QAction::triggered, this, &TextEditor::slotItalic);
-    italic->setStatusTip("При выделении текста справа налево текст меняется только один раз при нажатии. "
-                   "При выделении слева направо, текст меняется каждый раз.");
+    italic->setStatusTip(tr("When selecting text from right to left, the text changes only once when clicked. "
+                            "When you select from left to right, the text changes every time."));
 
-    QAction *underlined = toolbar->addAction(QIcon(":/res/Icons-file/underline"), "Underlined");                // кнопка вызова функции подчеркнутого шрифта
+    QAction *underlined = toolbar->addAction(QIcon(":/res/Icons-file/underline"), tr("Underlined"));                // кнопка вызова функции подчеркнутого шрифта
     connect(underlined, &QAction::triggered, this, &TextEditor::slotUnderlined);
-    underlined->setStatusTip("При выделении текста справа налево текст меняется только один раз при нажатии. "
-                   "При выделении слева направо, текст меняется каждый раз.");
+    underlined->setStatusTip(tr("When selecting text from right to left, the text changes only once when clicked. "
+                                "When you select from left to right, the text changes every time."));
 
-    QAction *crossedOut = toolbar->addAction(QIcon(":/res/Icons-file/cross-out"), "Cross");                     // кнопка вызова функции зачеркнутого шрифта
+    QAction *crossedOut = toolbar->addAction(QIcon(":/res/Icons-file/cross-out"), tr("Cross"));                     // кнопка вызова функции зачеркнутого шрифта
     connect(crossedOut, &QAction::triggered, this, &TextEditor::slotCrossedOut);
-    crossedOut->setStatusTip("При выделении текста справа налево текст меняется только один раз при нажатии. "
-                             "При выделении слева направо, текст меняется каждый раз.");
+    crossedOut->setStatusTip(tr("When selecting text from right to left, the text changes only once when clicked. "
+                                "When you select from left to right, the text changes every time."));
 
     toolbar->addSeparator();
 
-    QAction *font_style = toolbar->addAction(QIcon(":/res/Icons-file/font-adjustment"), "Font style");      // кнопка вызова функции изменения стиля шрифта
+    QAction *font_style = toolbar->addAction(QIcon(":/res/Icons-file/font-adjustment"), tr("Font style"));      // кнопка вызова функции изменения стиля шрифта
     connect(font_style, &QAction::triggered, this, &TextEditor::slotFontStyle);
 
-    QAction *font_color = toolbar->addAction(QIcon(":/res/Icons-file/color-text"), "Font color");           // кнопка вызова функции изменения цвета шрифта
+    QAction *font_color = toolbar->addAction(QIcon(":/res/Icons-file/color-text"), tr("Font color"));           // кнопка вызова функции изменения цвета шрифта
     connect(font_color, &QAction::triggered, this, &TextEditor::slotFontColor);
 
     toolbar->addSeparator();
 
-    QAction *iamge = toolbar->addAction(QIcon(":/res/Icons-file/insert-picture-icon"), "Insert image");     // кнопка вызова функции добавления изображения
+    QAction *iamge = toolbar->addAction(QIcon(":/res/Icons-file/insert-picture-icon"), tr("Insert image"));     // кнопка вызова функции добавления изображения
     connect(iamge, &QAction::triggered, this, &TextEditor::slotInsertImage);
 
     return toolbar;
@@ -186,7 +198,7 @@ void TextEditor::slotFileNew()      // функция создания ново�
 {
     if (hasUnsavedChanges()) {      // вызов функции проверки сохранения текущего файла
         QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Unsaved changes", "You have unsaved changes. Do you want to save them?", QMessageBox::Yes|QMessageBox::No);
+        reply = QMessageBox::question(this, tr("Unsaved changes"), tr("You have unsaved changes. Do you want to save them?"), QMessageBox::Yes|QMessageBox::No);
         if (reply == QMessageBox::Yes)
         {
             slotFileSaveAs();               // если мы создали новый файл и выбираем сохранить изменения - сохраняем файл, область открытого текста, путь, имя файла в шапке
@@ -215,46 +227,37 @@ void TextEditor::slotFileNew()      // функция создания ново�
     }
 }
 
-void TextEditor::slotFileOpen()     // функция открытия файла
-{
-    if (hasUnsavedChanges())        // вызов функции проверки сохранения текущего файла
-    {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Unsaved changes", "You have unsaved changes. Do you want to save them?", QMessageBox::Yes | QMessageBox::No);
-        if (reply == QMessageBox::Yes)
-        {
+void TextEditor::slotFileOpen() {
+    if (hasUnsavedChanges()) {
+        QMessageBox messageBox(QMessageBox::Question,
+                               tr("Unsaved changes"),
+                               tr("You have unsaved changes. Do you want to save them?"),
+                               QMessageBox::Yes | QMessageBox::No,
+                               this);
+
+        // Устанавливаем переводимый текст для кнопок "Yes" и "No"
+        messageBox.setButtonText(QMessageBox::Yes, tr("Yes"));
+        messageBox.setButtonText(QMessageBox::No, tr("No"));
+
+        int reply = messageBox.exec();
+
+        if (reply == QMessageBox::Yes) {
             slotFileSave();     // если мы открыли новый файл и выбираем сохранить изменения - сохраняем файл
         }
-        else
-        {
-            QString file_name = QFileDialog::getOpenFileName(this, "Open the file");
-            QFile file(file_name);
-            file_path = file_name;
-            if (!file.open(QFile::ReadOnly | QFile::Text))
-            {
-                QMessageBox::warning(this, "Warning", "File not opened");  // если файл не открылся - выводится сообщение
-                return;
-            }
-            QTextStream in(&file);
-            QString text = in.readAll();
-            uiPtr->textEdit->setText(text);
-            QFileInfo fileInfo(file_path);
-            QString titleName = fileInfo.fileName();
-            slotRenameTitle(titleName);     // вызов функции изменения названия файла
-            file.close();
-        }
     }
-    QString file_name = QFileDialog::getOpenFileName(this, "Open the file");
+
+    QString file_name = QFileDialog::getOpenFileName(this, tr("Open the file"));
     QFile file(file_name);
     file_path = file_name;
-    if(!file.open(QFile::ReadOnly | QFile::Text))
-    {
-        QMessageBox::warning(this, "Warning", "File not opened"); // если файл не открылся - выводится сообщение
+
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        QMessageBox::warning(this, tr("Warning"), tr("File not opened"));  // если файл не открылся - выводится сообщение
         return;
     }
+
     QTextStream in(&file);
     QString text = in.readAll();
-    uiPtr->textEdit->setText(text);      // вывод содержимого файла в textBrowser
+    uiPtr->textEdit->setText(text);
     QFileInfo fileInfo(file_path);
     QString titleName = fileInfo.fileName();
     isFileSaved = true;
@@ -282,11 +285,11 @@ void TextEditor::slotFileSave()     // функция сохранения фа�
 
 void TextEditor::slotFileSaveAs()       //функция сохранения с новым именем файла
 {
-    QString file_name = QFileDialog::getSaveFileName(this, "Save the file", "", "Text Files (*.txt)");  // сохраняет в формате txt
+    QString file_name = QFileDialog::getSaveFileName(this, tr("Save the file"), "", tr("Text Files (*.txt)"));  // сохраняет в формате txt
     QFile file(file_name);
     if(!file.open(QFile::WriteOnly | QFile::Text))
     {
-        QMessageBox::warning(this, "Warning", "Cannot save the file"); // если файл не сохранен - выводится сообщение
+        QMessageBox::warning(this, tr("Warning"), tr("Cannot save the file")); // если файл не сохранен - выводится сообщение
         return;
     }
     file_path = file_name;
@@ -317,8 +320,18 @@ void TextEditor::slotExitFile()     // функция выхода
 {
     if (hasUnsavedChanges())        // вызов функции проверки сохранения текущего файла
     {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Unsaved changes", "You have unsaved changes. Do you really want to save them?", QMessageBox::Yes | QMessageBox::No);
+        QMessageBox messageBox(QMessageBox::Question,
+                               tr("Unsaved changes"),
+                               tr("You have unsaved changes. Do you really want to save them?"),
+                               QMessageBox::Yes | QMessageBox::No,
+                               this);
+
+        // Устанавливаем переводимый текст для кнопок "Yes" и "No"
+        messageBox.setButtonText(QMessageBox::Yes, tr("Yes"));
+        messageBox.setButtonText(QMessageBox::No, tr("No"));
+
+        int reply = messageBox.exec();
+
         if (reply == QMessageBox::No)
         {
             QApplication::exit();       // если мы выбираем не сохранять изменения - выход
@@ -430,14 +443,14 @@ void TextEditor::slotFontStyle()        // функция изменения с�
 void TextEditor::slotFontColor()        // функция изменения цвета шрифта
 {
 
-    QPoint Pos =mapFromGlobal(QCursor::pos());
+    QPoint Pos = mapFromGlobal(QCursor::pos());
     createColorPalette(Pos.x() , Pos.y()-(uiPtr->toolBar->height()));   // вызов функции выбора цветовой палитры
 
 }
 
 void TextEditor::slotInsertImage()      // функция добавления изображения
 {
-    QString file_path = QFileDialog::getOpenFileName(this, "Open the file");
+    QString file_path = QFileDialog::getOpenFileName(this, tr("Open the file"));
     if (file_path.isEmpty())
     {
         return;             // если отменить вставку изображения - выход из функции
@@ -474,6 +487,47 @@ void TextEditor::slotLightMode()        // функция светлой тем�
     }
 }
 
+void TextEditor::slotEnglish() {
+    qApp->removeTranslator(&qtLanguageTranslator);
+    uiPtr->retranslateUi(this);
+
+    this->setWindowTitle(tr("Text Editor"));
+
+    // Настройка перевода динамических элементов
+
+    uiPtr->menubar->clear(); // Очистка динамически созданных меню
+    uiPtr->toolBar->clear(); // Очистка динамически созданной панели инструментов
+
+    uiPtr->menubar->addMenu(menuConfig());  // добавление в menubar меню File
+    uiPtr->menubar->addMenu(editMenu());    // добавление в menubar меню Edit
+    uiPtr->menubar->addMenu(formatMenu());  // добавление в menubar меню Format
+    uiPtr->menubar->addMenu(insertMenu());  // добавление в menubar меню Insert
+    uiPtr->menubar->addMenu(viewMenu());    // добавление в menubar меню View
+    uiPtr->menubar->addMenu(languageMenu());// добавление в menubar меню Language
+    uiPtr->toolBar->addWidget(toolbar());    // Добавить виджет заново
+
+}
+
+
+void TextEditor::slotRussian()
+{
+    qApp->installTranslator(&qtLanguageTranslator);
+    uiPtr->retranslateUi(this);
+
+    //Настройка перевода динамических элементов
+
+    uiPtr->menubar->clear(); // Очистка динамически созданных меню
+    uiPtr->toolBar->clear(); // Очистка динамически созданной панели инструментов
+
+    uiPtr->menubar->addMenu(menuConfig());  // добавление в menubar меню File
+    uiPtr->menubar->addMenu(editMenu());    // добавление в menubar меню Edit
+    uiPtr->menubar->addMenu(formatMenu());  // добавление в menubar меню Format
+    uiPtr->menubar->addMenu(insertMenu());  // добавление в menubar меню Insert
+    uiPtr->menubar->addMenu(viewMenu());    // добавление в menubar меню View
+    uiPtr->menubar->addMenu(languageMenu());// добавление в menubar меню Language
+    uiPtr->toolBar->addWidget(toolbar());    // Добавить виджет заново
+}
+
 bool TextEditor::hasUnsavedChanges()        // функция проверки сохранения текущего файла
 {
     if(uiPtr->textEdit->toPlainText().length() > 0 && file_path.isEmpty()) {
@@ -503,7 +557,6 @@ void TextEditor::setPaletteColors(){        // функция установки
     blueColorButton->setStyleSheet("background:blue;");
     purpleColorButton->setStyleSheet("background:purple;");
     blackColorButton->setStyleSheet("background:black;");
-
 
 }
 

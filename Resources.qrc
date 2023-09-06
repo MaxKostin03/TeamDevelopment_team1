@@ -24,4 +24,7 @@
         <file>Icons-file/forward.png</file>
         <file>Icons-file/turn-left.png</file>
     </qresource>
+    <qresource prefix="/">
+        <file>QtLanguage_ru.qm</file>
+    </qresource>
 </RCC>
