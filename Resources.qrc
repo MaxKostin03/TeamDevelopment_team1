@@ -23,6 +23,10 @@
         <file>Icons-file/insert-picture-icon.png</file>
         <file>Icons-file/forward.png</file>
         <file>Icons-file/turn-left.png</file>
+        <file>Icons-file/english.png</file>
+        <file>Icons-file/russian.png</file>
+        <file>Icons-file/info.png</file>
+        <file>Icons-file/question.png</file>
     </qresource>
     <qresource prefix="/">
         <file>QtLanguage_ru.qm</file>

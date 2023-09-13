@@ -45,6 +45,8 @@ private slots:
     void slotLightMode();
     void slotEnglish();
     void slotRussian();
+    void slotHelp();
+    void slotAbout();
     void closeEvent(QCloseEvent *event);
     bool hasUnsavedChanges();
 
@@ -57,6 +59,7 @@ private slots:
     void onPurpleColorButtonClicked();
     void onBlackColorButtonClicked();
 
+
 private:
     Ui::TextEditor *uiPtr;
     QString file_path = "";
@@ -66,6 +69,8 @@ private:
     QMenu *insertMenu();
     QMenu *viewMenu();
     QMenu *languageMenu();
+    QAction *help();
+    QAction *about();
     QToolBar *toolbar();
 
     bool isFileSaved = true;
@@ -86,6 +91,7 @@ private:
     void createColorPalette(qint32 x ,qint32 y , qint32 width=200 , qint32 height=100);
     void hidePalette(QWidget *window);
     void showPalette(QWidget *window);
+
 
     QTranslator qtLanguageTranslator;
 };
