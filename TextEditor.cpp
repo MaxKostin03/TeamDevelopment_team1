@@ -18,13 +18,20 @@ TextEditor::TextEditor(QWidget *parent)
     slotLightMode();
     qtLanguageTranslator.load(":/QtLanguage_ru.qm", ".");
 
+    setWindowIcon(QIcon(":/res/Icons-file/file")); // добавление иконки приложения
+
+
+
     uiPtr->menubar->addMenu(menuConfig());  // добавление в menubar меню File
     uiPtr->menubar->addMenu(editMenu());    // добавление в menubar меню Edit
     uiPtr->menubar->addMenu(formatMenu());  // добавление в menubar меню Format
     uiPtr->menubar->addMenu(insertMenu());  // добавление в menubar меню Insert
     uiPtr->menubar->addMenu(viewMenu());    // добавление в menubar меню View
     uiPtr->menubar->addMenu(languageMenu());// добавление в menubar меню Language
+    uiPtr->menubar->addAction(help()); // добавление в menubar Help
+    uiPtr->menubar->addAction(about()); // добавление в menubar About
     uiPtr->toolBar->addWidget(toolbar());   // добавление в toolbar блока кнопок управления
+
 
 }
 
@@ -32,6 +39,7 @@ TextEditor::~TextEditor()
 {
     delete uiPtr;
 }
+
 
 QMenu *TextEditor::menuConfig()     // заполнение меню File
 {
@@ -107,10 +115,30 @@ QMenu *TextEditor::languageMenu()       // заполнение меню Languag
     QFont font("Corbel", 10);
     QMenu *menuLanguagePtr = new QMenu(this);
     menuLanguagePtr->setTitle(tr("Language"));
-    menuLanguagePtr->addAction(tr("English"), this, &TextEditor::slotEnglish);    // кнопка вызова функции английского языка
-    menuLanguagePtr->addAction(tr("Russian"), this, &TextEditor::slotRussian);  // кнопка вызова функции русского языка
+    menuLanguagePtr->addAction(tr("English"), this, &TextEditor::slotEnglish)->setIcon(QIcon(":/res/Icons-file/english"));    // кнопка вызова функции английского языка
+    menuLanguagePtr->addAction(tr("Russian"), this, &TextEditor::slotRussian)->setIcon(QIcon(":/res/Icons-file/russian"));  // кнопка вызова функции русского языка
     return menuLanguagePtr;
 }
+
+QAction *TextEditor::help()       // заполнение Help
+{
+    QFont font("Corbel", 10);
+    QAction *helpPtr=new QAction(this);
+    helpPtr->setText(tr("Help"));
+    connect(helpPtr, SIGNAL(triggered(bool)), this, SLOT(slotHelp()));
+    return helpPtr;
+}
+
+QAction *TextEditor::about()       // заполнение About
+{
+    QFont font("Corbel", 10);
+    QAction *aboutPtr=new QAction(this);
+    aboutPtr->setText(tr("About"));
+    connect(aboutPtr, SIGNAL(triggered(bool)), this, SLOT(slotAbout()));
+    return aboutPtr;
+}
+
+
 
 QToolBar *TextEditor::toolbar()     // заполнение в toolbar блока кнопок управления
 {
@@ -504,6 +532,8 @@ void TextEditor::slotEnglish() {
     uiPtr->menubar->addMenu(insertMenu());  // добавление в menubar меню Insert
     uiPtr->menubar->addMenu(viewMenu());    // добавление в menubar меню View
     uiPtr->menubar->addMenu(languageMenu());// добавление в menubar меню Language
+    uiPtr->menubar->addAction(help()); // добавление в menubar Help
+    uiPtr->menubar->addAction(about()); // добавление в menubar About
     uiPtr->toolBar->addWidget(toolbar());    // Добавить виджет заново
 
 }
@@ -525,7 +555,49 @@ void TextEditor::slotRussian()
     uiPtr->menubar->addMenu(insertMenu());  // добавление в menubar меню Insert
     uiPtr->menubar->addMenu(viewMenu());    // добавление в menubar меню View
     uiPtr->menubar->addMenu(languageMenu());// добавление в menubar меню Language
+    uiPtr->menubar->addAction(help()); // добавление в menubar Help
+    uiPtr->menubar->addAction(about()); // добавление в menubar About
     uiPtr->toolBar->addWidget(toolbar());    // Добавить виджет заново
+}
+
+void TextEditor::slotHelp(){                  //функция Help
+    QVBoxLayout *textHelp=new QVBoxLayout;
+    QTextEdit *textEdit=new QTextEdit;
+    textHelp->addWidget(textEdit);
+    QWidget *helpWidget=new QWidget;
+    helpWidget->setWindowIcon(QIcon(":/res/Icons-file/question"));
+    helpWidget->setWindowTitle (tr("Help"));
+    textEdit->setText (tr("Create file (Ctrl+N)\n"
+                      "Open file (Ctrl+O)\n"
+                      "Save file (Ctrl+S)\n"
+                      "Save with new file name (Ctrl+Shift+S)\n"
+                      "Print file (Ctrl+P)\n"
+                      "Exit (Ctrl+F4)\n"
+                      "Undo action (Ctrl+Z)\n"
+                      "Repeat action (Ctrl+Y)\n"
+                      "Copy (Ctrl+C)\n"
+                      "Cut (Ctrl+X)\n"
+                      "Paste (Ctrl+V)\n"
+                      "Select all (Ctrl+A)\n"
+                      "Applying bold text (Ctrl+B)\n"
+                      "Applying italic text (Ctrl+I)\n"
+                      "Underline text (Ctrl+U)\n"));
+    textEdit->setReadOnly(true);
+    helpWidget->setLayout(textHelp);
+    helpWidget->show();
+}
+
+void TextEditor::slotAbout(){                  //функция About
+    QVBoxLayout *textAbout=new QVBoxLayout;
+    QTextEdit *textEdit=new QTextEdit;
+    textAbout->addWidget(textEdit);
+    QWidget *aboutWidget=new QWidget;
+    aboutWidget->setWindowIcon(QIcon(":/res/Icons-file/info"));
+    aboutWidget->setWindowTitle (tr("About"));
+    textEdit->setText (tr("Text Editor version 1.0\n"));
+    textEdit->setReadOnly(true);
+    aboutWidget->setLayout(textAbout);
+    aboutWidget->show();
 }
 
 bool TextEditor::hasUnsavedChanges()        // функция проверки сохранения текущего файла
