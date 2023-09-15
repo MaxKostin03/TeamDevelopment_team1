@@ -11,6 +11,7 @@
 #include <QComboBox>
 #include <QTranslator>
 #include <QRegularExpression>
+#include <QtWebView>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class TextEditor; }

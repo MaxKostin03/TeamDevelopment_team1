@@ -507,7 +507,7 @@ void TextEditor::slotInsertFormula()
                                   "  - Using the constant π instead of PI.\n"
                                   "Enter your formula:");
 
-    QString formula = QInputDialog::getText(this, tr("Insert image"), introductoryText, QLineEdit::Normal, QString(), &ok);
+    QString formula = QInputDialog::getText(this, tr("Insert formula"), introductoryText, QLineEdit::Normal, QString(), &ok);
 
     if (ok && !formula.isEmpty())
     {
@@ -516,12 +516,16 @@ void TextEditor::slotInsertFormula()
         formula.replace("+", "&#43;"); // Замена + на HTML-код
         formula.replace("-", "&#8722;"); // Замена - на HTML-код
         formula.replace("*", "&#215;"); // Замена * на HTML-код
-        formula.replace("/", "&#247;"); // Замена / на HTML-код
+        //formula.replace("/", "&#247;"); // Замена / на HTML-код
         formula.replace("PI", "π");
 
         // Парсинг и форматирование математического выражения
-        formula.replace("sqrt", "<span>&radic;</span>");
-        formula.replace(QRegularExpression("(\\d+)\\^(\\d+)"), "\\1<sup>\\2</sup>");
+        formula.replace(QRegularExpression("([a-zA-Z0-9]+)\\(([^)]+)\\)\\^(\\d+)"), "\\1(\\2)<sup>\\3</sup>"); // Регулярное выражение для степени после скобок
+
+        formula.replace("sqrt", "<span>&radic;</span>");     // Регулярное выражение для корня
+        formula.replace(QRegularExpression("(\\w+)\\^(\\w+)"), "\\1<sup>\\2</sup>");     // Регулярное выражение для степени
+
+        formula.replace(QRegularExpression("([a-zA-Z0-9]+)\\s*/\\s*([a-zA-Z0-9]+)"), "<span class=\"numerator\">\\1</span><span class=\"fraction-line\"></span><span class=\"denominator\">\\2</span>"); // Регулярное выражение для дроби
 
         QTextCursor cursor = uiPtr->textEdit->textCursor();
         QString selectedText = cursor.selectedText();
@@ -539,9 +543,6 @@ void TextEditor::slotInsertFormula()
         }
     }
 }
-
-
-
 
 void TextEditor::slotDarkMode()     // функция темной темы
 {

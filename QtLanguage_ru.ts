@@ -247,7 +247,7 @@
     <message>
         <location filename="TextEditor.cpp" line="213"/>
         <source>Insert formula</source>
-        <translation>Вставить формулу</translation>
+        <translation>Вставка формулы</translation>
     </message>
     <message>
         <location filename="TextEditor.cpp" line="222"/>

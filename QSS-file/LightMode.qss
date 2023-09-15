@@ -398,3 +398,19 @@ QStatusBar
 }
 
 
+/* Стили для числителя дроби */
+.numerator {
+    font-size: 14px;
+    color: #000000;
+}
+
+/* Стили для знаменателя дроби */
+.denominator {
+    font-size: 14px;
+    color: #000000;
+}
+
+/* Стили для линии дроби */
+.fraction-line {
+    border-top: 1px solid #000000;
+}
