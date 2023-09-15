@@ -20,8 +20,6 @@ TextEditor::TextEditor(QWidget *parent)
 
     setWindowIcon(QIcon(":/res/Icons-file/file")); // добавление иконки приложения
 
-
-
     uiPtr->menubar->addMenu(menuConfig());  // добавление в menubar меню File
     uiPtr->menubar->addMenu(editMenu());    // добавление в menubar меню Edit
     uiPtr->menubar->addMenu(formatMenu());  // добавление в menubar меню Format
@@ -96,6 +94,7 @@ QMenu *TextEditor::insertMenu()     // заполнение меню Insert
     menuInsertPtr->setFont(font);
     menuInsertPtr->setTitle(tr("Insert"));
     menuInsertPtr->addAction(tr("Image"), this, &TextEditor::slotInsertImage)->setIcon(QIcon(":/res/Icons-file/insert-picture-icon"));  // кнопка вызова функции добавления изображения
+    menuInsertPtr->addAction(tr("Formula"), this, &TextEditor::slotInsertFormula)->setIcon(QIcon(":/res/Icons-file/insert-formula-icon"));  // кнопка вызова функции добавления формулы
     return menuInsertPtr;
 }
 
@@ -208,8 +207,11 @@ QToolBar *TextEditor::toolbar()     // заполнение в toolbar блок�
 
     toolbar->addSeparator();
 
-    QAction *iamge = toolbar->addAction(QIcon(":/res/Icons-file/insert-picture-icon"), tr("Insert image"));     // кнопка вызова функции добавления изображения
-    connect(iamge, &QAction::triggered, this, &TextEditor::slotInsertImage);
+    QAction *image = toolbar->addAction(QIcon(":/res/Icons-file/insert-picture-icon"), tr("Insert image"));     // кнопка вызова функции добавления изображения
+    connect(image, &QAction::triggered, this, &TextEditor::slotInsertImage);
+
+    QAction *formula = toolbar->addAction(QIcon(":/res/Icons-file/insert-formula-icon"), tr("Insert formula"));     // кнопка вызова функции добавления формулы
+    connect(formula, &QAction::triggered, this, &TextEditor::slotInsertFormula);
 
     return toolbar;
 }
@@ -491,6 +493,57 @@ void TextEditor::slotInsertImage()      // функция добавления �
     uiPtr->textEdit->textCursor().insertImage(img_fmt); // вставка изображения
 }
 
+void TextEditor::slotInsertFormula()
+{
+    bool ok;
+    QString introductoryText = tr("This window is intended for entering mathematical formulas. You can use the following operators:\n"
+                                  "  - Addition: +;\n"
+                                  "  - Subtraction: -;\n"
+                                  "  - Multiplication: *;\n"
+                                  "  - Division: /;\n"
+                                  "  - Degree: a^b (for example, 2^3 for 2 to the power of 3);\n"
+                                  "  - Using trigonometric formulas (e.g. sin, cos, tan, con, sec, cosec);\n"
+                                  "  - Root: sqrt(a) (for example, sqrt(16) for the square root of 16);\n"
+                                  "  - Using the constant π instead of PI.\n"
+                                  "Enter your formula:");
+
+    QString formula = QInputDialog::getText(this, tr("Insert formula"), introductoryText, QLineEdit::Normal, QString(), &ok);
+
+    if (ok && !formula.isEmpty())
+    {
+        // Заменяем базовые операторы на их HTML-эквиваленты
+        formula.replace("&", "&amp;"); // Экранируем символ & как &amp;
+        formula.replace("+", "&#43;"); // Замена + на HTML-код
+        formula.replace("-", "&#8722;"); // Замена - на HTML-код
+        formula.replace("*", "&#215;"); // Замена * на HTML-код
+        //formula.replace("/", "&#247;"); // Замена / на HTML-код
+        formula.replace("PI", "π");
+
+        // Парсинг и форматирование математического выражения
+        formula.replace(QRegularExpression("([a-zA-Z0-9]+)\\(([^)]+)\\)\\^(\\d+)"), "\\1(\\2)<sup>\\3</sup>"); // Регулярное выражение для степени после скобок
+
+        formula.replace("sqrt", "<span>&radic;</span>");     // Регулярное выражение для корня
+        formula.replace(QRegularExpression("(\\w+)\\^(\\w+)"), "\\1<sup>\\2</sup>");     // Регулярное выражение для степени
+
+        formula.replace(QRegularExpression("([a-zA-Z0-9]+)\\s*/\\s*([a-zA-Z0-9]+)"), "<span class=\"numerator\">\\1</span><span class=\"fraction-line\"></span><span class=\"denominator\">\\2</span>"); // Регулярное выражение для дроби
+
+        QTextCursor cursor = uiPtr->textEdit->textCursor();
+        QString selectedText = cursor.selectedText();
+        int position = cursor.selectionStart();
+
+        if (selectedText.isEmpty()) // Если нет выделенного текста
+        {
+            cursor.insertHtml(formula); // Вставляем отформатированное выражение
+        }
+        else
+        {
+            // Заменяем выделенный текст на отформатированное выражение
+            cursor.removeSelectedText();
+            cursor.insertHtml(formula);
+        }
+    }
+}
+
 void TextEditor::slotDarkMode()     // функция темной темы
 {
     QFile qssFile(":/res/QSS-file/DarkMode.qss");   // выбрать стиль из ресурсов
@@ -526,14 +579,14 @@ void TextEditor::slotEnglish() {
     uiPtr->menubar->clear(); // Очистка динамически созданных меню
     uiPtr->toolBar->clear(); // Очистка динамически созданной панели инструментов
 
-    uiPtr->menubar->addMenu(menuConfig());  // добавление в menubar меню File
-    uiPtr->menubar->addMenu(editMenu());    // добавление в menubar меню Edit
-    uiPtr->menubar->addMenu(formatMenu());  // добавление в menubar меню Format
-    uiPtr->menubar->addMenu(insertMenu());  // добавление в menubar меню Insert
-    uiPtr->menubar->addMenu(viewMenu());    // добавление в menubar меню View
-    uiPtr->menubar->addMenu(languageMenu());// добавление в menubar меню Language
-    uiPtr->menubar->addAction(help()); // добавление в menubar Help
-    uiPtr->menubar->addAction(about()); // добавление в menubar About
+    uiPtr->menubar->addMenu(menuConfig());   // добавление в menubar меню File
+    uiPtr->menubar->addMenu(editMenu());     // добавление в menubar меню Edit
+    uiPtr->menubar->addMenu(formatMenu());   // добавление в menubar меню Format
+    uiPtr->menubar->addMenu(insertMenu());   // добавление в menubar меню Insert
+    uiPtr->menubar->addMenu(viewMenu());     // добавление в menubar меню View
+    uiPtr->menubar->addMenu(languageMenu()); // добавление в menubar меню Language
+    uiPtr->menubar->addAction(help());       // добавление в menubar Help
+    uiPtr->menubar->addAction(about());      // добавление в menubar About
     uiPtr->toolBar->addWidget(toolbar());    // Добавить виджет заново
 
 }
@@ -549,14 +602,14 @@ void TextEditor::slotRussian()
     uiPtr->menubar->clear(); // Очистка динамически созданных меню
     uiPtr->toolBar->clear(); // Очистка динамически созданной панели инструментов
 
-    uiPtr->menubar->addMenu(menuConfig());  // добавление в menubar меню File
-    uiPtr->menubar->addMenu(editMenu());    // добавление в menubar меню Edit
-    uiPtr->menubar->addMenu(formatMenu());  // добавление в menubar меню Format
-    uiPtr->menubar->addMenu(insertMenu());  // добавление в menubar меню Insert
-    uiPtr->menubar->addMenu(viewMenu());    // добавление в menubar меню View
-    uiPtr->menubar->addMenu(languageMenu());// добавление в menubar меню Language
-    uiPtr->menubar->addAction(help()); // добавление в menubar Help
-    uiPtr->menubar->addAction(about()); // добавление в menubar About
+    uiPtr->menubar->addMenu(menuConfig());   // добавление в menubar меню File
+    uiPtr->menubar->addMenu(editMenu());     // добавление в menubar меню Edit
+    uiPtr->menubar->addMenu(formatMenu());   // добавление в menubar меню Format
+    uiPtr->menubar->addMenu(insertMenu());   // добавление в menubar меню Insert
+    uiPtr->menubar->addMenu(viewMenu());     // добавление в menubar меню View
+    uiPtr->menubar->addMenu(languageMenu()); // добавление в menubar меню Language
+    uiPtr->menubar->addAction(help());       // добавление в menubar Help
+    uiPtr->menubar->addAction(about());      // добавление в menubar About
     uiPtr->toolBar->addWidget(toolbar());    // Добавить виджет заново
 }
 

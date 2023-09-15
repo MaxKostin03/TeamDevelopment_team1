@@ -6,7 +6,12 @@
 #include <QPushButton>
 #include <QGroupBox>
 #include <QGridLayout>
+#include <QInputDialog>
+#include <QDialogButtonBox>
+#include <QComboBox>
 #include <QTranslator>
+#include <QRegularExpression>
+#include <QtWebView>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class TextEditor; }
@@ -41,6 +46,7 @@ private slots:
     void slotFontStyle();
     void slotFontColor();
     void slotInsertImage();
+    void slotInsertFormula();
     void slotDarkMode();
     void slotLightMode();
     void slotEnglish();
@@ -95,4 +101,5 @@ private:
 
     QTranslator qtLanguageTranslator;
 };
+
 #endif // TEXTEDITOR_H
