@@ -1,11 +1,34 @@
-#include "TextEditor.h"
-
 #include <QApplication>
+#include <QCommandLineParser>
+#include <QCommandLineOption>
+
+#include "TextEditor.h"
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QApplication app(argc, argv);
+
+    QCoreApplication::setApplicationName("Editor #1");
+    QCoreApplication::setOrganizationName("Team #1");
+    QCoreApplication::setApplicationVersion(QT_VERSION_STR);
+    //QApplication::setWindowIcon(QIcon(":/images/MDI_256.png"));
+    app.setDesktopSettingsAware(true);
+
+    QCommandLineParser parser;
+    parser.setApplicationDescription("[Qt] Editor #1");
+    parser.addHelpOption();
+    parser.addVersionOption();
+    parser.addPositionalArgument("file", "The file to open.");
+    parser.process(app);
+
     TextEditor textEditor;
+    const QStringList posArgs = parser.positionalArguments();
+    for (const QString &fileName : posArgs)
+    {
+        textEditor.loadFile(fileName);
+        break;
+    }
     textEditor.showMaximized(); //полный экран
-    return a.exec();
+
+    return app.exec();
 }

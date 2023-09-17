@@ -25,8 +25,10 @@ public:
     TextEditor(QWidget *parent = nullptr);
     ~TextEditor();
 
+    bool loadFile(const QString&);
+
 private slots:
-    void slotRenameTitle(QString newName);
+    void slotRenameTitle(QString);
     void slotFileNew();
     void slotFileOpen();
     void slotFileSave();
