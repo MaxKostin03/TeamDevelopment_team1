@@ -257,43 +257,7 @@ void TextEditor::slotFileNew()      // функция создания ново�
     }
 }
 
-void TextEditor::slotFileOpen() {
-    if (hasUnsavedChanges()) {
-        QMessageBox messageBox(QMessageBox::Question,
-                               tr("Unsaved changes"),
-                               tr("You have unsaved changes. Do you want to save them?"),
-                               QMessageBox::Yes | QMessageBox::No,
-                               this);
 
-        // Устанавливаем переводимый текст для кнопок "Yes" и "No"
-        messageBox.setButtonText(QMessageBox::Yes, tr("Yes"));
-        messageBox.setButtonText(QMessageBox::No, tr("No"));
-
-        int reply = messageBox.exec();
-
-        if (reply == QMessageBox::Yes) {
-            slotFileSave();     // если мы открыли новый файл и выбираем сохранить изменения - сохраняем файл
-        }
-    }
-
-    QString file_name = QFileDialog::getOpenFileName(this, tr("Open the file"));
-    QFile file(file_name);
-    file_path = file_name;
-
-    if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        QMessageBox::warning(this, tr("Warning"), tr("File not opened"));  // если файл не открылся - выводится сообщение
-        return;
-    }
-
-    QTextStream in(&file);
-    QString text = in.readAll();
-    uiPtr->textEdit->setText(text);
-    QFileInfo fileInfo(file_path);
-    QString titleName = fileInfo.fileName();
-    isFileSaved = true;
-    slotRenameTitle(titleName);     // вызов функции изменения названия файла
-    file.close();
-}
 
 void TextEditor::slotFileSave()     // функция сохранения файла
 {
@@ -802,4 +766,54 @@ void TextEditor::hidePalette(QWidget *window){      // функция скрыт
 }
 void TextEditor::showPalette(QWidget *window){      // функция показа окна кнопок цветовой палитры
     if(window !=NULL) window->show();       // показать окно
+}
+
+void TextEditor::slotFileOpen() {
+
+    if (hasUnsavedChanges()) {
+        QMessageBox messageBox(QMessageBox::Question,
+                                tr("Unsaved changes"),
+                                tr("You have unsaved changes. Do you want to save them?"),
+                                QMessageBox::Yes | QMessageBox::No,
+                                this);
+
+        // Устанавливаем переводимый текст для кнопок "Yes" и "No"
+        messageBox.setButtonText(QMessageBox::Yes, tr("Yes"));
+        messageBox.setButtonText(QMessageBox::No, tr("No"));
+
+        int reply = messageBox.exec();
+
+        if (reply == QMessageBox::Yes) {
+            slotFileSave();     // если мы открыли новый файл и выбираем сохранить изменения - сохраняем файл
+        }
+    }
+
+    QString file_name = QFileDialog::getOpenFileName(this, tr("Open the file"));
+    loadFile(file_name);
+}
+
+bool TextEditor::loadFile(const QString &fileName)
+{
+    if (fileName.isEmpty())
+        return false;
+
+    QFile file(fileName);
+    file_path = fileName;
+
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        QMessageBox::warning(this, tr("Warning"), tr("File not opened"));  // если файл не открылся - выводится сообщение
+        return false;
+    }
+
+    QTextStream in(&file);
+    QString text = in.readAll();
+    uiPtr->textEdit->setText(text);
+    QFileInfo fileInfo(file_path);
+    QString titleName = fileInfo.fileName();
+    isFileSaved = true;
+    slotRenameTitle(titleName);     // вызов функции изменения названия окна
+    file.close();
+    //TextEditor::prependToRecentFiles(fileName);
+
+    return true;
 }
