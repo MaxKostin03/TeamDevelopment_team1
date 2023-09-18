@@ -13,7 +13,7 @@
 #include <QRegularExpression>
 #include <QtWebView>
 
-class EditWindow;
+//class EditWindow;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class TextEditor; }
