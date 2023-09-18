@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("Editor #1");
     QCoreApplication::setOrganizationName("Team #1");
     QCoreApplication::setApplicationVersion(QT_VERSION_STR);
-    //QApplication::setWindowIcon(QIcon(":/images/MDI_256.png"));
+    //QApplication::setWindowIcon(QIcon(":/Icons-file/TE_256.png")); // Иконка самого приложения
     app.setDesktopSettingsAware(true);
 
     QCommandLineParser parser;
