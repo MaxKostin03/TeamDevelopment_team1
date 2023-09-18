@@ -1,5 +1,6 @@
 #include "TextEditor.h"
 #include "ui_TextEditor.h"
+
 #include <QFile>
 #include <QFileDialog>
 #include <QTextStream>
@@ -789,31 +790,29 @@ void TextEditor::slotFileOpen() {
     }
 
     QString file_name = QFileDialog::getOpenFileName(this, tr("Open the file"));
-    loadFile(file_name);
+
+    if (uiPtr->textEdit->loadFile(file_name))
+    {
+        QString titleName = uiPtr->textEdit->userFriendlyCurrentFile();
+        slotRenameTitle(titleName);     // вызов функции изменения названия окна
+        isFileSaved = true;
+    };
 }
 
 bool TextEditor::loadFile(const QString &fileName)
 {
     if (fileName.isEmpty())
-        return false;
-
-    QFile file(fileName);
-    file_path = fileName;
-
-    if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        QMessageBox::warning(this, tr("Warning"), tr("File not opened"));  // если файл не открылся - выводится сообщение
+    {
         return false;
     }
+    else if (uiPtr->textEdit->loadFile(fileName))
+    {
+        QString titleName = uiPtr->textEdit->userFriendlyCurrentFile();
+        slotRenameTitle(titleName);     // вызов функции изменения названия окна
+        isFileSaved = true;
 
-    QTextStream in(&file);
-    QString text = in.readAll();
-    uiPtr->textEdit->setText(text);
-    QFileInfo fileInfo(file_path);
-    QString titleName = fileInfo.fileName();
-    isFileSaved = true;
-    slotRenameTitle(titleName);     // вызов функции изменения названия окна
-    file.close();
-    //TextEditor::prependToRecentFiles(fileName);
+        return true;
+    };
 
-    return true;
+    return false;
 }

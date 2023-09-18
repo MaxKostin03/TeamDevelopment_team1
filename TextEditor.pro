@@ -13,10 +13,12 @@ CODECFORSRC     = UTF-8
 
 SOURCES += \
     TextEditor.cpp \
+    EditWindow.cpp \
     main.cpp
 
 HEADERS += \
-    TextEditor.h
+    TextEditor.h \
+    EditWindow.h
 
 FORMS += \
     TextEditor.ui

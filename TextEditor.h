@@ -13,6 +13,8 @@
 #include <QRegularExpression>
 #include <QtWebView>
 
+class EditWindow;
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class TextEditor; }
 QT_END_NAMESPACE
@@ -26,6 +28,7 @@ public:
     ~TextEditor();
 
     bool loadFile(const QString&);
+    bool hasUnsavedChanges();
 
 private slots:
     void slotRenameTitle(QString);
@@ -56,7 +59,7 @@ private slots:
     void slotHelp();
     void slotAbout();
     void closeEvent(QCloseEvent *event);
-    bool hasUnsavedChanges();
+
 
     void onRedColorButtonClicked();
     void onOrangeColorButtonClicked();
