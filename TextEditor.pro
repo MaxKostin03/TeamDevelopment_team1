@@ -1,4 +1,4 @@
-QT       += core gui printsupport webview
+QT       += core gui printsupport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -12,16 +12,19 @@ CODECFORSRC     = UTF-8
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    TextEditor.cpp \
     EditWindow.cpp \
+    TextEditor.cpp \
+	SearchWidget.cpp \
     main.cpp
 
 HEADERS += \
+    EditWindow.h \
     TextEditor.h \
-    EditWindow.h
+	SearchWidget.h
 
 FORMS += \
-    TextEditor.ui
+    TextEditor.ui \
+	SearchWidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

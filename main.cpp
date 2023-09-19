@@ -6,6 +6,7 @@
 
 int main(int argc, char *argv[])
 {
+
     QApplication app(argc, argv);
 
     QCoreApplication::setApplicationName("Editor #1");
@@ -29,6 +30,8 @@ int main(int argc, char *argv[])
         break;
     }
     textEditor.showMaximized(); //полный экран
+
+
 
     return app.exec();
 }
