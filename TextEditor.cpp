@@ -9,6 +9,7 @@
 #include <QFontDialog>
 #include <QtPrintSupport/QPrinter>
 #include <QtPrintSupport/QPrintDialog>
+#include <QTextCharFormat>
 
 TextEditor::TextEditor(QWidget *parent)
     : QMainWindow(parent), uiPtr(new Ui::TextEditor)
@@ -30,8 +31,9 @@ TextEditor::TextEditor(QWidget *parent)
     uiPtr->menubar->addAction(help()); // добавление в menubar Help
     uiPtr->menubar->addAction(about()); // добавление в menubar About
     uiPtr->toolBar->addWidget(toolbar());   // добавление в toolbar блока кнопок управления
+    searchWidget = new SearchWidget;
 
-
+    connect(searchWidget, SIGNAL(signalSearchText(QString)), this, SLOT(slotSearchText(QString))); // подключаем сигнал с текстом поиска для вызова функции поиска текста
 }
 
 TextEditor::~TextEditor()
@@ -213,6 +215,9 @@ QToolBar *TextEditor::toolbar()     // заполнение в toolbar блок�
 
     QAction *formula = toolbar->addAction(QIcon(":/res/Icons-file/insert-formula-icon"), tr("Insert formula"));     // кнопка вызова функции добавления формулы
     connect(formula, &QAction::triggered, this, &TextEditor::slotInsertFormula);
+
+    QAction *search = toolbar->addAction(QIcon(":/res/Icons-file/search"), tr("Search text"));     // кнопка вызова окна для поиска текста
+    connect(search, &QAction::triggered, this, &TextEditor::slotSearch);
 
     return toolbar;
 }
@@ -509,6 +514,19 @@ void TextEditor::slotInsertFormula()
     }
 }
 
+void TextEditor::slotSearch()       // функция вызова окна для поиска текста
+{
+    searchWidget->setModal(true);
+    searchWidget->show();   // показать окно
+    m_searchHighLight = new SearchHighLight(uiPtr->textEdit->document());
+}
+
+void TextEditor::slotSearchText(QString text)       // функция поиска текста
+{
+    m_searchHighLight->searchText(text);    // поиск текста
+    //searchWidget->hide();   // скрыть окно
+}
+
 void TextEditor::slotDarkMode()     // функция темной темы
 {
     QFile qssFile(":/res/QSS-file/DarkMode.qss");   // выбрать стиль из ресурсов
@@ -553,7 +571,7 @@ void TextEditor::slotEnglish() {
     uiPtr->menubar->addAction(help());       // добавление в menubar Help
     uiPtr->menubar->addAction(about());      // добавление в menubar About
     uiPtr->toolBar->addWidget(toolbar());    // Добавить виджет заново
-
+    searchWidget = new SearchWidget;
 }
 
 
@@ -576,13 +594,14 @@ void TextEditor::slotRussian()
     uiPtr->menubar->addAction(help());       // добавление в menubar Help
     uiPtr->menubar->addAction(about());      // добавление в menubar About
     uiPtr->toolBar->addWidget(toolbar());    // Добавить виджет заново
+    searchWidget = new SearchWidget;
 }
 
 void TextEditor::slotHelp(){                  //функция Help
     QVBoxLayout *textHelp=new QVBoxLayout;
     QTextEdit *textEdit=new QTextEdit;
     textHelp->addWidget(textEdit);
-    QWidget *helpWidget=new QWidget;
+    QDialog *helpWidget=new QDialog;// исправление бага B8
     helpWidget->setWindowIcon(QIcon(":/res/Icons-file/question"));
     helpWidget->setWindowTitle (tr("Help"));
     textEdit->setText (tr("Create file (Ctrl+N)\n"
@@ -602,6 +621,7 @@ void TextEditor::slotHelp(){                  //функция Help
                       "Underline text (Ctrl+U)\n"));
     textEdit->setReadOnly(true);
     helpWidget->setLayout(textHelp);
+    helpWidget->setModal(true);// исправление бага B8
     helpWidget->show();
 }
 
@@ -609,12 +629,13 @@ void TextEditor::slotAbout(){                  //функция About
     QVBoxLayout *textAbout=new QVBoxLayout;
     QTextEdit *textEdit=new QTextEdit;
     textAbout->addWidget(textEdit);
-    QWidget *aboutWidget=new QWidget;
+    QDialog *aboutWidget=new QDialog;//исправление бага B9
     aboutWidget->setWindowIcon(QIcon(":/res/Icons-file/info"));
     aboutWidget->setWindowTitle (tr("About"));
     textEdit->setText (tr("Text Editor version 1.0\n"));
     textEdit->setReadOnly(true);
     aboutWidget->setLayout(textAbout);
+    aboutWidget->setModal(true);//исправление бага B9
     aboutWidget->show();
 }
 
@@ -816,3 +837,25 @@ bool TextEditor::loadFile(const QString &fileName)
 
     return false;
 }
+
+SearchHighLight::SearchHighLight(QTextDocument* parent) : BaseClass(parent)
+{
+    m_format.setBackground(Qt::green);
+}
+
+void SearchHighLight::highlightBlock(const QString& text)
+{
+    QRegularExpressionMatchIterator matchIterator = m_pattern.globalMatch(text);
+    while (matchIterator.hasNext())
+    {
+        QRegularExpressionMatch match = matchIterator.next();
+        setFormat(match.capturedStart(), match.capturedLength(), m_format);
+    }
+}
+
+void SearchHighLight::searchText(const QString& text)
+{
+    m_pattern = QRegularExpression(text);
+    rehighlight(); // Перезапускаем подсветку
+}
+

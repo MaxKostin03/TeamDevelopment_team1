@@ -28,6 +28,7 @@
         <file>Icons-file/info.png</file>
         <file>Icons-file/question.png</file>
         <file>Icons-file/insert-formula-icon.png</file>
+        <file>Icons-file/search.png</file>
     </qresource>
     <qresource prefix="/">
         <file>QtLanguage_ru.qm</file>

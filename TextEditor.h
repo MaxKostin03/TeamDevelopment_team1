@@ -11,9 +11,15 @@
 #include <QComboBox>
 #include <QTranslator>
 #include <QRegularExpression>
-#include <QtWebView>
+#include <QSyntaxHighlighter>
+#include <QRegularExpression>
+#include "SearchWidget.h"
+
+//#include <QtWebView>
 
 //class EditWindow;
+class SearchWidget;
+class SearchHighLight;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class TextEditor; }
@@ -58,6 +64,8 @@ private slots:
     void slotRussian();
     void slotHelp();
     void slotAbout();
+    void slotSearch();
+    void slotSearchText(QString text);
     void closeEvent(QCloseEvent *event);
 
 
@@ -105,6 +113,26 @@ private:
 
 
     QTranslator qtLanguageTranslator;
+
+    SearchHighLight* m_searchHighLight;
+    SearchWidget *searchWidget;
+};
+
+class SearchHighLight : public QSyntaxHighlighter
+{
+    Q_OBJECT
+    using BaseClass = QSyntaxHighlighter;
+public:
+    explicit SearchHighLight(QTextDocument* parent = nullptr);
+
+    void searchText(const QString& text);
+
+protected:
+    virtual void highlightBlock(const QString &text) override;
+
+private:
+    QRegularExpression m_pattern; // Regular expression to search for, in our case, this word or text
+    QTextCharFormat m_format; // Text formatting, highlighting
 };
 
 #endif // TEXTEDITOR_H
