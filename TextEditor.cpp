@@ -52,6 +52,7 @@ QMenu *TextEditor::menuConfig()     // заполнение меню File
     menuFilePtr->addAction(tr("Open"), this, &TextEditor::slotFileOpen, QKeySequence::Open)->setIcon(QIcon(":/res/Icons-file/folder"));         // кнопка вызова функции открытия файла (Ctrl+O)
     menuFilePtr->addAction(tr("Save"), this, &TextEditor::slotFileSave, QKeySequence::Save)->setIcon(QIcon(":/res/Icons-file/diskette"));       // кнопка вызова функции сохранения файла (Ctrl+S)
     menuFilePtr->addAction(tr("Save as"), this, &TextEditor::slotFileSaveAs, QKeySequence(tr("Ctrl+Shift+S")))->setIcon(QIcon(":/res/Icons-file/save-as")); // кнопка вызова функции сохранения с новым именем файла (Ctrl+Shift+S)
+    menuFilePtr->addAction(tr("Export to PDF"), this, &TextEditor::slotExportToPdf); // Кнопака вызова функции экспорта в pdf
     menuFilePtr->addAction(tr("Print"), this, &TextEditor::slotPrintFile, QKeySequence::Print)->setIcon(QIcon(":/res/Icons-file/printer"));     // кнопка вызова функции печати файла (Ctrl+P)
     menuFilePtr->addSeparator();
     menuFilePtr->addAction(tr("Exit"), this, &TextEditor::slotExitFile, QKeySequence::Close)->setIcon(QIcon(":/res/Icons-file/logout"));        // кнопка вызова функции выхода (Ctrl+F4)
@@ -302,6 +303,21 @@ void TextEditor::slotFileSaveAs()       //функция сохранения с
     file.flush();
     file.close();
     isFileSaved = true;
+}
+
+// Функция экспорта в pdf
+void TextEditor::slotExportToPdf() {
+    QString fileName = QFileDialog::getSaveFileName((QWidget*)0, "Export PDF", QString(), "*.pdf");
+    if (QFileInfo(fileName).suffix().isEmpty()) {
+        fileName.append(".pdf");
+    }
+
+    QPrinter printer(QPrinter::PrinterResolution);
+    printer.setOutputFormat(QPrinter::PdfFormat);
+    printer.setPageSize(QPageSize::A4);
+    printer.setOutputFileName(fileName);
+
+    uiPtr->textEdit->print(&printer);
 }
 
 void TextEditor::slotPrintFile()        // функция печати файла
