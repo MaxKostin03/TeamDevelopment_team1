@@ -30,6 +30,9 @@
         <file>Icons-file/insert-formula-icon.png</file>
         <file>Icons-file/search.png</file>
         <file>Icons-file/PDF.png</file>
+        <file>Icons-file/AlignCenter.png</file>
+        <file>Icons-file/AlignLeft.png</file>
+        <file>Icons-file/AlignRight.png</file>
     </qresource>
     <qresource prefix="/">
         <file>QtLanguage_ru.qm</file>
