@@ -57,6 +57,9 @@ private slots:
     void slotCrossedOut();
     void slotFontStyle();
     void slotFontColor();
+    void slotLeftSide();
+    void slotInTheCenter();
+    void slotRightSide();
     void slotInsertImage();
     void slotInsertFormula();
     void slotDarkMode();

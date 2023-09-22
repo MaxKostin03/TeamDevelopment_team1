@@ -88,6 +88,9 @@ QMenu *TextEditor::formatMenu()     // заполнение меню Format
     menuFormatPtr->addSeparator();
     menuFormatPtr->addAction(tr("Font style"), this, &TextEditor::slotFontStyle)->setIcon(QIcon(":/res/Icons-file/font-adjustment"));    // кнопка вызова функции изменения стиля шрифта
     menuFormatPtr->addAction(tr("Font color"), this, &TextEditor::slotFontColor)->setIcon(QIcon(":/res/Icons-file/color-text"));         // кнопка вызова функции изменения цвета шрифта
+    menuFormatPtr->addAction(tr("Align left"), this, &TextEditor::slotLeftSide)->setIcon(QIcon(":/res/Icons-file/AlignLeft"));          // кнопка вызова функции выравнивания текста по левому краю
+    menuFormatPtr->addAction(tr("Align center"), this, &TextEditor::slotInTheCenter)->setIcon(QIcon(":/res/Icons-file/AlignCenter"));    // кнопка вызова функции выравнивания текста по центру
+    menuFormatPtr->addAction(tr("Align right"), this, &TextEditor::slotRightSide)->setIcon(QIcon(":/res/Icons-file/AlignRight"));       // кнопка вызова функции выравнивания текста по правому краю
     return menuFormatPtr;
 }
 
@@ -208,6 +211,15 @@ QToolBar *TextEditor::toolbar()     // заполнение в toolbar блок�
 
     QAction *font_color = toolbar->addAction(QIcon(":/res/Icons-file/color-text"), tr("Font color"));           // кнопка вызова функции изменения цвета шрифта
     connect(font_color, &QAction::triggered, this, &TextEditor::slotFontColor);
+
+    QAction *align_left = toolbar->addAction(QIcon(":/res/Icons-file/AlignLeft"), tr("Align left"));             // кнопка вызова функции выравнивания текста по левому краю
+    connect(align_left, &QAction::triggered, this, &TextEditor::slotLeftSide);
+
+    QAction *align_center = toolbar->addAction(QIcon(":/res/Icons-file/AlignCenter"), tr("Align center"));       // кнопка вызова функции выравнивания текста по центру
+    connect(align_center, &QAction::triggered, this, &TextEditor::slotInTheCenter);
+
+    QAction *align_right = toolbar->addAction(QIcon(":/res/Icons-file/AlignRight"), tr("Align right"));          // кнопка вызова функции выравнивания текста по правому краю
+    connect(align_right, &QAction::triggered, this, &TextEditor::slotRightSide);
 
     toolbar->addSeparator();
 
@@ -462,6 +474,33 @@ void TextEditor::slotFontColor()        // функция изменения ц�
     QPoint Pos = mapFromGlobal(QCursor::pos());
     createColorPalette(Pos.x() , Pos.y()-(uiPtr->toolBar->height()));   // вызов функции выбора цветовой палитры
 
+}
+
+void TextEditor::slotLeftSide()                               // функция выравнивания текста по левому краю
+{
+    QTextCursor cursor = uiPtr->textEdit->textCursor();
+    QTextBlockFormat textBlockFormat = cursor.blockFormat();
+    textBlockFormat.setAlignment(Qt::AlignLeft);
+    cursor.mergeBlockFormat(textBlockFormat);
+    uiPtr->textEdit->setTextCursor(cursor);
+}
+
+void TextEditor::slotInTheCenter()                             // функция выравнивания текста по центру
+{
+    QTextCursor center = uiPtr->textEdit->textCursor();
+    QTextBlockFormat textBlockFormat = center.blockFormat();
+    textBlockFormat.setAlignment(Qt::AlignCenter);
+    center.mergeBlockFormat(textBlockFormat);
+    uiPtr->textEdit->setTextCursor(center);
+}
+
+void TextEditor::slotRightSide()                              // функция выравнивания текста по правому краю
+{
+    QTextCursor cursor = uiPtr->textEdit->textCursor();
+    QTextBlockFormat textBlockFormat = cursor.blockFormat();
+    textBlockFormat.setAlignment(Qt::AlignRight);
+    cursor.mergeBlockFormat(textBlockFormat);
+    uiPtr->textEdit->setTextCursor(cursor);
 }
 
 void TextEditor::slotInsertImage()      // функция добавления изображения
