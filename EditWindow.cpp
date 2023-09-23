@@ -1,18 +1,29 @@
 #include <QtWidgets>
 #include <QFileInfo>
+#include <QtPrintSupport/QPrinter>
+#include <QtPrintSupport/QPrintDialog>
 
 #include "EditWindow.h"
 
 EditWindow::EditWindow(QWidget *parent)
-: QTextEdit(parent)
+    : QTextEdit(parent)
 {
     setAttribute(Qt::WA_DeleteOnClose);
-    isUntitled = true;
+    //isUntitled = true;
+    newFile();
+
+    connect(document(), &QTextDocument::contentsChanged,
+            this, &EditWindow::documentWasModified);
 }
 
 EditWindow::~EditWindow()
 {
     // Выполняем необходимые действия перед уничтожением объекта
+}
+
+void EditWindow::documentWasModified()
+{
+    setWindowModified(document()->isModified());
 }
 
 QString EditWindow::strippedName(const QString &fullFileName)
@@ -30,7 +41,7 @@ void EditWindow::setCurrentFile(const QString &fileName)
     curFile = QFileInfo(fileName).canonicalFilePath();
     isUntitled = false;
     document()->setModified(false);
-    //setWindowModified(false);
+    setWindowModified(false);
     //setWindowTitle(userFriendlyCurrentFile() + "[*]");
 }
 
@@ -48,13 +59,13 @@ bool EditWindow::loadFile(const QString &fileName)
 
     QTextStream in(&file);
     QGuiApplication::setOverrideCursor(Qt::WaitCursor);
-    setPlainText(in.readAll());
+    setText(in.readAll());
     QGuiApplication::restoreOverrideCursor();
 
     setCurrentFile(fileName);
 
 //    connect(document(), &QTextDocument::contentsChanged,
-//            this, &MdiChild::documentWasModified);
+//            this, &EditWindow::documentWasModified);
 
     return true;
 }
@@ -90,6 +101,7 @@ bool EditWindow::save()
     } else {
         return saveFile(curFile);
     }
+
 }
 
 bool EditWindow::saveAs()
@@ -103,14 +115,13 @@ bool EditWindow::saveAs()
 
 bool EditWindow::saveFile(const QString &fileName)
 {
-    /*
     QString errorMessage;
 
     QGuiApplication::setOverrideCursor(Qt::WaitCursor);
     QSaveFile file(fileName);
     if (file.open(QFile::WriteOnly | QFile::Text)) {
         QTextStream out(&file);
-        out << toPlainText();
+        out << toHtml(); // toPlainText();
         if (!file.commit()) {
             errorMessage = tr("Cannot write file %1:\n%2.")
                                .arg(QDir::toNativeSeparators(fileName), file.errorString());
@@ -127,21 +138,47 @@ bool EditWindow::saveFile(const QString &fileName)
     }
 
     setCurrentFile(fileName);
-    */
+
     return true;
 }
 
 
 void EditWindow::newFile()
 {
-    /*
     static int sequenceNumber = 1;
 
     isUntitled = true;
     curFile = tr("document%1.txt").arg(sequenceNumber++);
-    setWindowTitle(curFile + "[*]");
+    //setWindowTitle(curFile + "[*]");
 
-    connect(document(), &QTextDocument::contentsChanged,
-            this, &MdiChild::documentWasModified);
-    */
+
+}
+
+void EditWindow::printFile() {
+
+    QPrinter printer;
+    QPrintDialog dlg(&printer, this);
+
+    dlg.setWindowTitle("Print");
+    if (dlg.exec() != QDialog::Accepted)
+    {
+        return;     // если отмена печати - выйти из функции
+    }
+    print(&printer);
+}
+
+void EditWindow::printPdf() {
+
+    QString fileName = QFileDialog::getSaveFileName((QWidget*)0, tr("Export PDF"), QString(), "*.pdf");
+
+    if (QFileInfo(fileName).suffix().isEmpty()) {
+        fileName.append(".pdf");
+    }
+
+    QPrinter printer(QPrinter::PrinterResolution);
+    printer.setOutputFormat(QPrinter::PdfFormat);
+    printer.setPageSize(QPageSize::A4);
+    printer.setOutputFileName(fileName);
+
+    print(&printer);
 }

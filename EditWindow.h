@@ -13,26 +13,28 @@ public:
     EditWindow(QWidget *parent = nullptr);
     ~EditWindow();
 
-    QString currentFile() { return curFile; }
-    QString userFriendlyCurrentFile();
-
     bool loadFile(const QString &fileName);
     bool save();
     bool saveAs();
     bool saveFile(const QString &fileName);
     void newFile();
 
-    /*
-protected:
-    void closeEvent(QCloseEvent *event) override;
-
 private slots:
-    void documentWasModified();
-    */
 
-private:
+    void documentWasModified();
+
+public:
+
+    QString currentFile() const { return curFile; };
+    QString userFriendlyCurrentFile();
 
     bool maybeSave();
+    bool getUntitled () const { return isUntitled; };
+
+    void printFile();
+    void printPdf();
+
+private:
 
     void setCurrentFile(const QString &fileName);
     QString strippedName(const QString &fullFileName);

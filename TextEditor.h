@@ -17,7 +17,6 @@
 
 //#include <QtWebView>
 
-//class EditWindow;
 class SearchWidget;
 class SearchHighLight;
 
@@ -34,17 +33,17 @@ public:
     ~TextEditor();
 
     bool loadFile(const QString&);
-    bool hasUnsavedChanges();
+    // bool hasUnsavedChanges(); // не требуется
 
 private slots:
-    void slotRenameTitle(QString);
+    void slotRenameTitle();
     void slotFileNew();
     void slotFileOpen();
     void slotFileSave();
     void slotFileSaveAs();
     void slotExportToPdf();
     void slotPrintFile();
-    void slotExitFile();
+    //void slotExitFile(); // не требуется
     void slotUndo();
     void slotRedo();
     void slotCopy();
@@ -82,10 +81,9 @@ private slots:
     void onPurpleColorButtonClicked();
     void onBlackColorButtonClicked();
 
-
 private:
     Ui::TextEditor *uiPtr;
-    QString file_path = "";
+    // QString file_path = ""; // не требуется
     QMenu *menuConfig();
     QMenu *editMenu();
     QMenu *formatMenu();
@@ -96,7 +94,7 @@ private:
     QAction *about();
     QToolBar *toolbar();
 
-    bool isFileSaved = true;
+    // bool isFileSaved = true; // не требуется
 
     QWidget *window = NULL;
     QGroupBox *gridGroupBox;
