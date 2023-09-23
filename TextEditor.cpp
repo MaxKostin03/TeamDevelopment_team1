@@ -34,6 +34,12 @@ TextEditor::TextEditor(QWidget *parent)
     connect(searchWidget, SIGNAL(signalSearchText(QString)), this, SLOT(slotSearchText(QString))); // подключаем сигнал с текстом поиска для вызова функции поиска текста
     connect(uiPtr->textEdit, &QTextEdit::textChanged, this, &TextEditor::slotRenameTitle);
 
+    uiPtr->textEdit->clear(); // Очищаем базовое контекстное меню
+
+    // Устанавливаем контекстное меню для QTextEdit
+    uiPtr->textEdit->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(uiPtr->textEdit, &QTextEdit::customContextMenuRequested, this, &TextEditor::slotContextMenu);
+
     slotRenameTitle();
 }
 
@@ -320,49 +326,80 @@ void TextEditor::slotSelectAll()        // функция выделить вс�
     uiPtr->textEdit->selectAll();
 }
 
-void TextEditor::slotBold()     // функция жирного шрифта
-{
-    if( uiPtr->textEdit->fontWeight() == QFont::Normal) {   // если текст не жирным шрифтом - делаем жирным
-        uiPtr->textEdit->setFontWeight(QFont::Bold);
-    }
-    else{                                                   // если текст жирным шрифтом - делаем не жирным
-        uiPtr->textEdit->setFontWeight(QFont::Normal);
+void TextEditor::slotDelete(){
+    QTextCursor cursor = uiPtr->textEdit->textCursor();
+
+    if (cursor.hasSelection()) {
+        cursor.removeSelectedText();
     }
 }
 
-void TextEditor::slotItalic()       // функциия курсивного шрифта
+void TextEditor::slotBold()
 {
-    if(uiPtr->textEdit->fontItalic() == false) {   // если текст не курсивным шрифтом - делаем курсив
-        uiPtr->textEdit->setFontItalic(true);
+    QTextCursor cursor = uiPtr->textEdit->textCursor();
+
+    if (cursor.hasSelection()) {
+        QTextCharFormat format;
+        format.setFontWeight(cursor.charFormat().fontWeight() == QFont::Bold ? QFont::Normal : QFont::Bold);
+        cursor.mergeCharFormat(format);
+    } else {
+        QTextCharFormat format = cursor.charFormat();
+        format.setFontWeight(format.fontWeight() == QFont::Bold ? QFont::Normal : QFont::Bold);
+        cursor.setCharFormat(format);
     }
-    else{                                           // если текст курсивным шрифтом - делаем не курсивным
-        uiPtr->textEdit->setFontItalic(false);
-    }
+
+    uiPtr->textEdit->setTextCursor(cursor);
 }
 
-void TextEditor::slotUnderlined()       // функция подчеркнутого шрифта
+
+void TextEditor::slotItalic()
 {
-    if( uiPtr->textEdit->fontUnderline() == false) {    // если текст не подчерунцтым шрифтом - делаем подчеркнутым
-        uiPtr->textEdit->setFontUnderline(true);
+    QTextCursor cursor = uiPtr->textEdit->textCursor();
+
+    if (cursor.hasSelection()) {
+        QTextCharFormat format;
+        format.setFontItalic(!cursor.charFormat().fontItalic());
+        cursor.mergeCharFormat(format);
+    } else {
+        QTextCharFormat format = cursor.charFormat();
+        format.setFontItalic(!format.fontItalic());
+        cursor.setCharFormat(format);
     }
-    else{                                               // если текст подчерунцтым шрифтом - делаем не подчеркнутым
-        uiPtr->textEdit->setFontUnderline(false);
-    }
+
+    uiPtr->textEdit->setTextCursor(cursor);
 }
 
-void TextEditor::slotCrossedOut()       // функция зачеркинутого шрифта
+void TextEditor::slotUnderlined()
 {
-    QFont font_ = uiPtr->textEdit->currentFont();
+    QFont font = uiPtr->textEdit->currentFont();
 
-    if( uiPtr->textEdit->currentFont().strikeOut() == false) {  // если текст не зачеркнутым шрифтом - делаем зачеркнутым
-        font_.setStrikeOut(true);
-        uiPtr->textEdit->setCurrentFont(font_);
+    if (!font.underline()) {
+        font.setUnderline(true);
+    } else {
+        font.setUnderline(false);
     }
-    else{                                                       // если текст зачеркнутым шрифтом - делаем не зачеркнутым
-        font_.setStrikeOut(false);
-        uiPtr->textEdit->setCurrentFont(font_);
+    uiPtr->textEdit->setCurrentFont(font);
+}
+
+void TextEditor::slotCrossedOut()
+{
+    QTextCursor cursor = uiPtr->textEdit->textCursor();
+
+    if (!cursor.hasSelection()) {
+        return; // Ничего не выделено
     }
 
+    QTextCharFormat format;
+    if (!isTextCrossedOut) {
+        format.setFontStrikeOut(true);
+        isTextCrossedOut = true;
+    } else {
+        format.setFontStrikeOut(false);
+        isTextCrossedOut = false;
+    }
+
+    cursor.mergeCharFormat(format);
+    uiPtr->textEdit->mergeCurrentCharFormat(format);
 }
 
 void TextEditor::slotFontStyle()        // функция изменения стиля шрифта
@@ -484,6 +521,45 @@ void TextEditor::slotSearch()       // функция вызова окна дл
     m_searchHighLight = new SearchHighLight(uiPtr->textEdit->document());
 }
 
+void TextEditor::slotContextMenu(const QPoint& pos) {
+    QMenu *contextMenu = new QMenu(this);
+
+    QAction *undoAction = new QAction(tr("Undo"), this);
+    contextMenu->addAction(undoAction);
+    connect(undoAction, &QAction::triggered, this, &TextEditor::slotUndo);
+
+    QAction *redoAction = new QAction(tr("Redo"), this);
+    contextMenu->addAction(redoAction);
+    connect(redoAction, &QAction::triggered, this, &TextEditor::slotRedo);
+
+    contextMenu->addSeparator();
+
+    QAction *cutAction = new QAction(tr("Cut"), this);
+    contextMenu->addAction(cutAction);
+    connect(cutAction, &QAction::triggered, this, &TextEditor::slotCut);
+
+    QAction *copyAction = new QAction(tr("Copy"), this);
+    contextMenu->addAction(copyAction);
+    connect(copyAction, &QAction::triggered, this, &TextEditor::slotCopy);
+
+    QAction *pasteAction = new QAction(tr("Paste"), this);
+    contextMenu->addAction(pasteAction);
+    connect(pasteAction, &QAction::triggered, this, &TextEditor::slotPaste);
+
+    QAction *deleteAction = new QAction(tr("Delete"), this);
+    contextMenu->addAction(deleteAction);
+    connect(deleteAction, &QAction::triggered, this, &TextEditor::slotDelete);
+
+    contextMenu->addSeparator();
+
+    QAction *selectAllAction = new QAction(tr("Select All"), this);
+    contextMenu->addAction(selectAllAction);
+    connect(selectAllAction, &QAction::triggered, this, &TextEditor::slotSelectAll);
+
+    // Отображаем контекстное меню в указанной позиции
+    contextMenu->exec(uiPtr->textEdit->mapToGlobal(pos));
+}
+
 void TextEditor::slotSearchText(QString text)       // функция поиска текста
 {
     m_searchHighLight->searchText(text);    // поиск текста
@@ -535,6 +611,9 @@ void TextEditor::slotEnglish() {
     uiPtr->menubar->addAction(about());      // добавление в menubar About
     uiPtr->toolBar->addWidget(toolbar());    // Добавить виджет заново
     searchWidget = new SearchWidget;
+
+    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+    window = NULL;          // очищение окна кнопок цветовой палитры
 }
 
 
@@ -558,6 +637,9 @@ void TextEditor::slotRussian()
     uiPtr->menubar->addAction(about());      // добавление в menubar About
     uiPtr->toolBar->addWidget(toolbar());    // Добавить виджет заново
     searchWidget = new SearchWidget;
+
+    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
+    window = NULL;          // очищение окна кнопок цветовой палитры
 }
 
 void TextEditor::slotHelp(){                  //функция Help
@@ -728,12 +810,10 @@ void TextEditor::createColorPalette(qint32 x ,qint32 y , qint32 height , qint32 
 }
 
 void TextEditor::hidePalette(QWidget *window){      // функция скрытия окна кнопок цветовой палитры
-    if(window !=NULL && window->isVisible())
-        window->hide();   // если окно видимо - скрыть
+    if(window !=NULL && window->isVisible())  window->hide();   // если окно видимо - скрыть
 }
 void TextEditor::showPalette(QWidget *window){      // функция показа окна кнопок цветовой палитры
-    if(window !=NULL)
-        window->show();       // показать окно
+    if(window !=NULL) window->show();       // показать окно
 }
 
 void TextEditor::slotFileOpen() {
