@@ -29,7 +29,8 @@ int main(int argc, char *argv[])
         textEditor.loadFile(fileName);
         break;
     }
-    textEditor.showMaximized(); //полный экран
+    //textEditor.showMaximized(); //полный экран
+    textEditor.show(); //полный экран
 
 
 

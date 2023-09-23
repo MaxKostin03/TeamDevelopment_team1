@@ -57,8 +57,9 @@ bool EditWindow::loadFile(const QString &fileName)
         return false;
     }
 
-    QTextStream in(&file);
     QGuiApplication::setOverrideCursor(Qt::WaitCursor);
+    clear();
+    QTextStream in(&file);
     setText(in.readAll());
     QGuiApplication::restoreOverrideCursor();
 
@@ -149,6 +150,9 @@ void EditWindow::newFile()
 
     isUntitled = true;
     curFile = tr("document%1.txt").arg(sequenceNumber++);
+
+    clear();
+    textCursor().setPosition(0);
     //setWindowTitle(curFile + "[*]");
 
 

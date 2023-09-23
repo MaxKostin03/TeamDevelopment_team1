@@ -8,6 +8,10 @@
 #include <QCloseEvent>
 #include <QFontDialog>
 #include <QTextCharFormat>
+#include <QSettings>
+
+
+// *** class TextEditor
 
 TextEditor::TextEditor(QWidget *parent)
     : QMainWindow(parent), uiPtr(new Ui::TextEditor)
@@ -35,6 +39,9 @@ TextEditor::TextEditor(QWidget *parent)
     connect(uiPtr->textEdit, &QTextEdit::textChanged, this, &TextEditor::slotRenameTitle);
 
     slotRenameTitle();
+
+    createStatusBar();
+    readSettings();
 }
 
 TextEditor::~TextEditor()
@@ -284,10 +291,13 @@ void TextEditor::slotPrintFile()        // функция печати файл�
 
 void TextEditor::closeEvent(QCloseEvent *event)     // функция выхода по крестику
 {
-    if (uiPtr->textEdit->maybeSave())
+    if (uiPtr->textEdit->maybeSave()) {
+        writeSettings();
         event->accept();
-    else
+    }
+    else {
         event->ignore();
+    }
 }
 
 void TextEditor::slotUndo()     // функция отмены действия
@@ -765,6 +775,35 @@ bool TextEditor::loadFile(const QString &fileName)
 
     return false;
 }
+
+void TextEditor::createStatusBar()
+{
+    statusBar()->showMessage(tr("Ready"));
+}
+
+void TextEditor::readSettings()
+{
+    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    const QByteArray geometry = settings.value("geometry", QByteArray()).toByteArray();
+    if (geometry.isEmpty()) {
+        // Размер экрана
+        QScreen *screen = QGuiApplication::primaryScreen();
+        QRect screenGeometry = screen->geometry();
+        // ... на весь экран
+        QMainWindow::setGeometry(screenGeometry);
+    } else {
+        restoreGeometry(geometry);
+    }
+}
+
+void TextEditor::writeSettings()
+{
+    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    settings.setValue("geometry", saveGeometry());
+}
+
+
+// *** class SearchHighLight
 
 SearchHighLight::SearchHighLight(QTextDocument* parent) : BaseClass(parent)
 {
