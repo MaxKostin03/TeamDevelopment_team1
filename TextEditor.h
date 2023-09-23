@@ -24,6 +24,9 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class TextEditor; }
 QT_END_NAMESPACE
 
+
+// *** class TextEditor
+
 class TextEditor : public QMainWindow
 {
     Q_OBJECT
@@ -36,6 +39,7 @@ public:
     // bool hasUnsavedChanges(); // не требуется
 
 private slots:
+
     void slotRenameTitle();
     void slotFileNew();
     void slotFileOpen();
@@ -82,6 +86,7 @@ private slots:
     void onBlackColorButtonClicked();
 
 private:
+
     Ui::TextEditor *uiPtr;
     // QString file_path = ""; // не требуется
     QMenu *menuConfig();
@@ -108,6 +113,10 @@ private:
     QPushButton *purpleColorButton;
     QPushButton *blackColorButton;
 
+    void createStatusBar();
+    void readSettings();
+    void writeSettings();
+
     void setPaletteColors();
     void createColorPalette(qint32 x ,qint32 y , qint32 width=200 , qint32 height=100);
     void hidePalette(QWidget *window);
@@ -120,21 +129,27 @@ private:
     SearchWidget *searchWidget;
 };
 
+// *** class SearchHighLight
+
 class SearchHighLight : public QSyntaxHighlighter
 {
     Q_OBJECT
     using BaseClass = QSyntaxHighlighter;
-public:
-    explicit SearchHighLight(QTextDocument* parent = nullptr);
 
+public:
+
+    explicit SearchHighLight(QTextDocument* parent = nullptr);
     void searchText(const QString& text);
 
 protected:
+
     virtual void highlightBlock(const QString &text) override;
 
 private:
+
     QRegularExpression m_pattern; // Regular expression to search for, in our case, this word or text
     QTextCharFormat m_format; // Text formatting, highlighting
+
 };
 
 #endif // TEXTEDITOR_H
