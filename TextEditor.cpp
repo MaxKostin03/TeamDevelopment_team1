@@ -7,8 +7,6 @@
 #include <QMessageBox>
 #include <QCloseEvent>
 #include <QFontDialog>
-#include <QtPrintSupport/QPrinter>
-#include <QtPrintSupport/QPrintDialog>
 #include <QTextCharFormat>
 
 TextEditor::TextEditor(QWidget *parent)
@@ -34,6 +32,9 @@ TextEditor::TextEditor(QWidget *parent)
     searchWidget = new SearchWidget;
 
     connect(searchWidget, SIGNAL(signalSearchText(QString)), this, SLOT(slotSearchText(QString))); // подключаем сигнал с текстом поиска для вызова функции поиска текста
+    connect(uiPtr->textEdit, &QTextEdit::textChanged, this, &TextEditor::slotRenameTitle);
+
+    slotRenameTitle();
 }
 
 TextEditor::~TextEditor()
@@ -54,8 +55,8 @@ QMenu *TextEditor::menuConfig()     // заполнение меню File
     menuFilePtr->addAction(tr("Save as"), this, &TextEditor::slotFileSaveAs, QKeySequence(tr("Ctrl+Shift+S")))->setIcon(QIcon(":/res/Icons-file/save-as")); // кнопка вызова функции сохранения с новым именем файла (Ctrl+Shift+S)
     menuFilePtr->addAction(tr("Export to PDF"), this, &TextEditor::slotExportToPdf)->setIcon(QIcon(":/res/Icons-file/PDF")); // кнопка вызова функции экспорта в pdf
     menuFilePtr->addAction(tr("Print"), this, &TextEditor::slotPrintFile, QKeySequence::Print)->setIcon(QIcon(":/res/Icons-file/printer"));     // кнопка вызова функции печати файла (Ctrl+P)
-    menuFilePtr->addSeparator();
-    menuFilePtr->addAction(tr("Exit"), this, &TextEditor::slotExitFile, QKeySequence::Close)->setIcon(QIcon(":/res/Icons-file/logout"));        // кнопка вызова функции выхода (Ctrl+F4)
+    //menuFilePtr->addSeparator();
+    //menuFilePtr->addAction(tr("Exit"), this, &TextEditor::slotExitFile, QKeySequence::Close)->setIcon(QIcon(":/res/Icons-file/logout"));        // кнопка вызова функции выхода (Ctrl+F4)
     return menuFilePtr;
 }
 
@@ -235,44 +236,25 @@ QToolBar *TextEditor::toolbar()     // заполнение в toolbar блок�
     return toolbar;
 }
 
-void TextEditor::slotRenameTitle(QString newName)       // функция изменения названия файла
+void TextEditor::slotRenameTitle()       // функция изменения названия файла
 {
-    if (newName == "")
-        setWindowTitle(tr("Text Editor - New document.txt*"));
+    QString title {""};
+
+    if (uiPtr->textEdit->getUntitled())
+        title = tr("Text Editor - ") + uiPtr->textEdit->currentFile();
     else
-        setWindowTitle(tr("Text Editor - ") + newName);
+        title = tr("Text Editor - ") + uiPtr->textEdit->userFriendlyCurrentFile();
+
+    title += (uiPtr->textEdit->document()->isModified() ? " (*)" : "");
+    setWindowTitle(title);
 }
 
 void TextEditor::slotFileNew()      // функция создания нового файла
 {
-    if (hasUnsavedChanges()) {      // вызов функции проверки сохранения текущего файла
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, tr("Unsaved changes"), tr("You have unsaved changes. Do you want to save them?"), QMessageBox::Yes|QMessageBox::No);
-        if (reply == QMessageBox::Yes)
-        {
-            slotFileSaveAs();               // если мы создали новый файл и выбираем сохранить изменения - сохраняем файл, область открытого текста, путь, имя файла в шапке
-            uiPtr->textEdit->clear();
-            file_path.clear();
-            QFileInfo fileInfo(file_path);
-            QString titleName = fileInfo.fileName();
-            slotRenameTitle(titleName);     // вызов функции изменения названия файла
-        }
-        else
-        {
-            uiPtr->textEdit->clear();    // если мы решили не сохранять изменения - мы просто очищаем все (область текста, путь, имя)
-            file_path.clear();
-            QFileInfo fileInfo(file_path);
-            QString titleName = fileInfo.fileName();
-            slotRenameTitle(titleName);     // вызов функции изменения названия файла
-        }
-    }
-    else
+    if (uiPtr->textEdit->maybeSave())
     {
-        uiPtr->textEdit->clear();        // если мы открыли существующий файл, но хотим создать новый файл без каких-либо изменений - мы просто очищаем все
-        file_path.clear();
-        QFileInfo fileInfo(file_path);
-        QString titleName = fileInfo.fileName();
-        slotRenameTitle(titleName);     // вызов функции изменения названия файла
+        uiPtr->textEdit->newFile();
+        slotRenameTitle();
     }
 }
 
@@ -280,106 +262,32 @@ void TextEditor::slotFileNew()      // функция создания ново�
 
 void TextEditor::slotFileSave()     // функция сохранения файла
 {
-    QFile file(file_path);
-    if(!file.open(QFile::WriteOnly | QFile::Text))
-    {
-        slotFileSaveAs();                   // если файл еще не существует, мы сохраняем его функцией "Save As", если он уже существует, просто сохраняем изменения
-    }
-    QFileInfo fileInfo(file_path);
-    QString titleName = fileInfo.fileName();
-    slotRenameTitle(titleName);     // вызов функции изменения названия файла
-    QTextStream out(&file);
-    QString text = uiPtr->textEdit->toHtml(); // чтобы сохранить форматирование и изображения, мы меняем "toPlainText" на "toHtml"
-    out << text;
-    file.flush();
-    file.close();
-    isFileSaved = true;
+    uiPtr->textEdit->save();
 }
 
 void TextEditor::slotFileSaveAs()       //функция сохранения с новым именем файла
 {
-    QString file_name = QFileDialog::getSaveFileName(this, tr("Save the file"), "", tr("Text Files (*.txt)"));  // сохраняет в формате txt
-    QFile file(file_name);
-    if(!file.open(QFile::WriteOnly | QFile::Text))
-    {
-        QMessageBox::warning(this, tr("Warning"), tr("Cannot save the file")); // если файл не сохранен - выводится сообщение
-        return;
-    }
-    file_path = file_name;
-    QFileInfo fileInfo(file_path);
-    QString titleName = fileInfo.fileName();
-    slotRenameTitle(titleName);     // вызов функции изменения названия файла
-    QTextStream out(&file);
-    QString text = uiPtr->textEdit->toHtml(); // чтобы сохранить форматирование и изображения, мы меняем "toPlainText" на "toHtml"
-    out << text;
-    file.flush();
-    file.close();
-    isFileSaved = true;
+    if (uiPtr->textEdit->saveAs())
+        slotRenameTitle(); // вызов функции изменения названия файла
 }
 
 // Функция экспорта в pdf
 void TextEditor::slotExportToPdf() {
-    QString fileName = QFileDialog::getSaveFileName((QWidget*)0, tr("Export PDF"), QString(), "*.pdf");
-    if (QFileInfo(fileName).suffix().isEmpty()) {
-        fileName.append(".pdf");
-    }
-
-    QPrinter printer(QPrinter::PrinterResolution);
-    printer.setOutputFormat(QPrinter::PdfFormat);
-    printer.setPageSize(QPageSize::A4);
-    printer.setOutputFileName(fileName);
-
-    uiPtr->textEdit->print(&printer);
+    uiPtr->textEdit->printPdf();
 }
 
 void TextEditor::slotPrintFile()        // функция печати файла
 {
-    QPrinter printer;
-    QPrintDialog dlg(&printer, this);
-    dlg.setWindowTitle("Print");
-    if (dlg.exec() != QDialog::Accepted)
-    {
-        return;     // если отмена печати - выйти из функции
-    }
-    uiPtr->textEdit->print(&printer);   // отправка на печать
-}
 
-void TextEditor::slotExitFile()     // функция выхода
-{
-    if (hasUnsavedChanges())        // вызов функции проверки сохранения текущего файла
-    {
-        QMessageBox messageBox(QMessageBox::Question,
-                               tr("Unsaved changes"),
-                               tr("You have unsaved changes. Do you really want to save them?"),
-                               QMessageBox::Yes | QMessageBox::No,
-                               this);
-
-        // Устанавливаем переводимый текст для кнопок "Yes" и "No"
-        messageBox.setButtonText(QMessageBox::Yes, tr("Yes"));
-        messageBox.setButtonText(QMessageBox::No, tr("No"));
-
-        int reply = messageBox.exec();
-
-        if (reply == QMessageBox::No)
-        {
-            QApplication::exit();       // если мы выбираем не сохранять изменения - выход
-        }
-        else
-        {
-            slotFileSave();     // если мы выбираем сохранить изменения - сохраняем файл
-            QApplication::exit();
-        }
-    }
-    else
-    {
-        QApplication::exit();       // если текущий файл сохранен или пуст - выход
-    }
+    uiPtr->textEdit->printFile();   // отправка на печать
 }
 
 void TextEditor::closeEvent(QCloseEvent *event)     // функция выхода по крестику
 {
-    event->ignore();
-    slotExitFile();     // вызов функции выхода
+    if (uiPtr->textEdit->maybeSave())
+        event->accept();
+    else
+        event->ignore();
 }
 
 void TextEditor::slotUndo()     // функция отмены действия
@@ -694,25 +602,6 @@ void TextEditor::slotAbout(){                  //функция About
     aboutWidget->show();
 }
 
-bool TextEditor::hasUnsavedChanges()        // функция проверки сохранения текущего файла
-{
-    if(uiPtr->textEdit->toPlainText().length() > 0 && file_path.isEmpty()) {
-        return true;
-    }
-
-
-    QFile file(file_path);
-    if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        return false;
-    }
-
-    QTextStream in(&file);
-    QString fileContent = in.readAll();
-    QString textContent = uiPtr->textEdit->toHtml();
-
-    return (textContent != fileContent);
-}
-
 void TextEditor::setPaletteColors(){        // функция установки цвета отображаемых кнопок
 
     redColorButton->setStyleSheet("background:red;");
@@ -839,40 +728,26 @@ void TextEditor::createColorPalette(qint32 x ,qint32 y , qint32 height , qint32 
 }
 
 void TextEditor::hidePalette(QWidget *window){      // функция скрытия окна кнопок цветовой палитры
-    if(window !=NULL && window->isVisible())  window->hide();   // если окно видимо - скрыть
+    if(window !=NULL && window->isVisible())
+        window->hide();   // если окно видимо - скрыть
 }
 void TextEditor::showPalette(QWidget *window){      // функция показа окна кнопок цветовой палитры
-    if(window !=NULL) window->show();       // показать окно
+    if(window !=NULL)
+        window->show();       // показать окно
 }
 
 void TextEditor::slotFileOpen() {
 
-    if (hasUnsavedChanges()) {
-        QMessageBox messageBox(QMessageBox::Question,
-                                tr("Unsaved changes"),
-                                tr("You have unsaved changes. Do you want to save them?"),
-                                QMessageBox::Yes | QMessageBox::No,
-                                this);
+    if (uiPtr->textEdit->maybeSave())
+    {
+        QString file_name = QFileDialog::getOpenFileName(this, tr("Open the file"));
 
-        // Устанавливаем переводимый текст для кнопок "Yes" и "No"
-        messageBox.setButtonText(QMessageBox::Yes, tr("Yes"));
-        messageBox.setButtonText(QMessageBox::No, tr("No"));
-
-        int reply = messageBox.exec();
-
-        if (reply == QMessageBox::Yes) {
-            slotFileSave();     // если мы открыли новый файл и выбираем сохранить изменения - сохраняем файл
-        }
+        if (uiPtr->textEdit->loadFile(file_name))
+        {
+            slotRenameTitle();     // вызов функции изменения названия окна
+        };
     }
 
-    QString file_name = QFileDialog::getOpenFileName(this, tr("Open the file"));
-
-    if (uiPtr->textEdit->loadFile(file_name))
-    {
-        QString titleName = uiPtr->textEdit->userFriendlyCurrentFile();
-        slotRenameTitle(titleName);     // вызов функции изменения названия окна
-        isFileSaved = true;
-    };
 }
 
 bool TextEditor::loadFile(const QString &fileName)
@@ -884,9 +759,7 @@ bool TextEditor::loadFile(const QString &fileName)
     else if (uiPtr->textEdit->loadFile(fileName))
     {
         QString titleName = uiPtr->textEdit->userFriendlyCurrentFile();
-        slotRenameTitle(titleName);     // вызов функции изменения названия окна
-        isFileSaved = true;
-
+        slotRenameTitle();     // вызов функции изменения названия окна
         return true;
     };
 
