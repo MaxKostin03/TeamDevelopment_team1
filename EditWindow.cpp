@@ -76,20 +76,25 @@ bool EditWindow::maybeSave()
 {
     if (!document()->isModified())
         return true;
-    const QMessageBox::StandardButton ret
-        = QMessageBox::warning(this, tr("Text editor"),
-                               tr("'%1' has been modified.\nDo you want to save your changes?")
-                                   .arg(userFriendlyCurrentFile()),
-                               QMessageBox::Save | QMessageBox::Discard
-                                   | QMessageBox::Cancel);
+    QMessageBox customBox(QMessageBox::Warning, tr("Text editor"),
+                          tr("'%1' has been modified.\nDo you want to save your changes?")
+                              .arg(userFriendlyCurrentFile()), QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+                          this);
+
+    customBox.setButtonText(QMessageBox::Save, tr("Save"));
+    customBox.setButtonText(QMessageBox::Discard, tr("Discard"));
+    customBox.setButtonText(QMessageBox::Cancel, tr("Cancel"));
+
+    customBox.setDefaultButton(QMessageBox::Save);
+    int ret = customBox.exec();
     switch (ret)
     {
-        case QMessageBox::Save:
-            return save();
-        case QMessageBox::Cancel:
-            return false;
-        default:
-            break;
+    case QMessageBox::Save:
+        return save();
+    case QMessageBox::Cancel:
+        return false;
+    default:
+        break;
     }
 
     return true;
@@ -163,7 +168,7 @@ void EditWindow::printFile() {
     QPrinter printer;
     QPrintDialog dlg(&printer, this);
 
-    dlg.setWindowTitle("Print");
+    dlg.setWindowTitle(tr("Print"));
     if (dlg.exec() != QDialog::Accepted)
     {
         return;     // если отмена печати - выйти из функции

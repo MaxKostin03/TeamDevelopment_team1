@@ -57,6 +57,7 @@ private slots:
     void slotCut();
     void slotPaste();
     void slotSelectAll();
+    void slotDelete();
     void slotBold();
     void slotItalic();
     void slotUnderlined();
@@ -75,6 +76,7 @@ private slots:
     void slotHelp();
     void slotAbout();
     void slotSearch();
+    void slotContextMenu(const QPoint& pos);
     void slotSearchText(QString text);
     void closeEvent(QCloseEvent *event);
 
