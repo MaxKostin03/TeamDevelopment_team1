@@ -14,17 +14,17 @@ CODECFORSRC     = UTF-8
 SOURCES += \
     EditWindow.cpp \
     TextEditor.cpp \
-	SearchWidget.cpp \
+    SearchWidget.cpp \
     main.cpp
 
 HEADERS += \
     EditWindow.h \
     TextEditor.h \
-	SearchWidget.h
+    SearchWidget.h
 
 FORMS += \
     TextEditor.ui \
-	SearchWidget.ui
+    SearchWidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
