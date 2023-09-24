@@ -14,26 +14,20 @@
 // *** class TextEditor
 
 TextEditor::TextEditor(QWidget *parent)
-    : QMainWindow(parent), uiPtr(new Ui::TextEditor)
+    : QMainWindow(parent)
+    , uiPtr(new Ui::TextEditor)
+    , searchWidget(new SearchWidget)
 {
     uiPtr->setupUi(this);
-    this->setWindowTitle(tr("Text Editor"));
+    //this->setWindowTitle(tr("Text Editor"));
 
     slotLightMode();
     qtLanguageTranslator.load(":/QtLanguage_ru.qm", ".");
 
     setWindowIcon(QIcon(":/res/Icons-file/file")); // добавление иконки приложения
 
-    uiPtr->menubar->addMenu(menuConfig());  // добавление в menubar меню File
-    uiPtr->menubar->addMenu(editMenu());    // добавление в menubar меню Edit
-    uiPtr->menubar->addMenu(formatMenu());  // добавление в menubar меню Format
-    uiPtr->menubar->addMenu(insertMenu());  // добавление в menubar меню Insert
-    uiPtr->menubar->addMenu(viewMenu());    // добавление в menubar меню View
-    uiPtr->menubar->addMenu(languageMenu());// добавление в menubar меню Language
-    uiPtr->menubar->addAction(help()); // добавление в menubar Help
-    uiPtr->menubar->addAction(about()); // добавление в menubar About
-    uiPtr->toolBar->addWidget(toolbar());   // добавление в toolbar блока кнопок управления
-    searchWidget = new SearchWidget;
+    createMenu();
+    //searchWidget = new SearchWidget;
 
     connect(searchWidget, SIGNAL(signalSearchText(QString)), this, SLOT(slotSearchText(QString))); // подключаем сигнал с текстом поиска для вызова функции поиска текста
     connect(uiPtr->textEdit, &QTextEdit::textChanged, this, &TextEditor::slotRenameTitle);
@@ -47,8 +41,21 @@ TextEditor::TextEditor(QWidget *parent)
 TextEditor::~TextEditor()
 {
     delete uiPtr;
+    delete searchWidget;
 }
 
+void TextEditor::createMenu()
+{
+    uiPtr->menubar->addMenu(menuConfig());  // добавление в menubar меню File
+    uiPtr->menubar->addMenu(editMenu());    // добавление в menubar меню Edit
+    uiPtr->menubar->addMenu(formatMenu());  // добавление в menubar меню Format
+    uiPtr->menubar->addMenu(insertMenu());  // добавление в menubar меню Insert
+    uiPtr->menubar->addMenu(viewMenu());    // добавление в menubar меню View
+    uiPtr->menubar->addMenu(languageMenu());// добавление в menubar меню Language
+    uiPtr->menubar->addAction(help());      // добавление в menubar Help
+    uiPtr->menubar->addAction(about());     // добавление в menubar About
+    uiPtr->toolBar->addWidget(toolbar());   // добавление в toolbar блока кнопок управления
+}
 
 QMenu *TextEditor::menuConfig()     // заполнение меню File
 {
@@ -62,8 +69,24 @@ QMenu *TextEditor::menuConfig()     // заполнение меню File
     menuFilePtr->addAction(tr("Save as"), this, &TextEditor::slotFileSaveAs, QKeySequence(tr("Ctrl+Shift+S")))->setIcon(QIcon(":/res/Icons-file/save-as")); // кнопка вызова функции сохранения с новым именем файла (Ctrl+Shift+S)
     menuFilePtr->addAction(tr("Export to PDF"), this, &TextEditor::slotExportToPdf)->setIcon(QIcon(":/res/Icons-file/PDF")); // кнопка вызова функции экспорта в pdf
     menuFilePtr->addAction(tr("Print"), this, &TextEditor::slotPrintFile, QKeySequence::Print)->setIcon(QIcon(":/res/Icons-file/printer"));     // кнопка вызова функции печати файла (Ctrl+P)
+
+    menuFilePtr->addSeparator();
+
+    recentMenu = menuFilePtr->addMenu(tr("Recent..."));
+    connect(recentMenu, &QMenu::aboutToShow, this, &TextEditor::updateRecentFileActions);
+    recentFileSubMenuAct = recentMenu->menuAction();
+
+    for (int i = 0; i < MaxRecentFiles; ++i) {
+        recentFileActs[i] = recentMenu->addAction(QString(), this, &TextEditor::openRecentFile);
+        recentFileActs[i]->setVisible(false);
+    }
+
+    recentFileSeparator = menuFilePtr->addSeparator();
+
+    setRecentFilesVisible(TextEditor::hasRecentFiles());
     //menuFilePtr->addSeparator();
     //menuFilePtr->addAction(tr("Exit"), this, &TextEditor::slotExitFile, QKeySequence::Close)->setIcon(QIcon(":/res/Icons-file/logout"));        // кнопка вызова функции выхода (Ctrl+F4)
+
     return menuFilePtr;
 }
 
@@ -269,13 +292,17 @@ void TextEditor::slotFileNew()      // функция создания ново�
 
 void TextEditor::slotFileSave()     // функция сохранения файла
 {
-    uiPtr->textEdit->save();
+    if (uiPtr->textEdit->save())
+        statusBar()->showMessage(tr("File saved"), 2000);
 }
 
 void TextEditor::slotFileSaveAs()       //функция сохранения с новым именем файла
 {
-    if (uiPtr->textEdit->saveAs())
+    if (uiPtr->textEdit->saveAs()) {
+        statusBar()->showMessage(tr("File saved"), 2000);
         slotRenameTitle(); // вызов функции изменения названия файла
+        TextEditor::prependToRecentFiles(uiPtr->textEdit->currentFile());
+    }
 }
 
 // Функция экспорта в pdf
@@ -755,6 +782,8 @@ void TextEditor::slotFileOpen() {
         if (uiPtr->textEdit->loadFile(file_name))
         {
             slotRenameTitle();     // вызов функции изменения названия окна
+            statusBar()->showMessage(tr("File loaded"), 2000);
+            TextEditor::prependToRecentFiles(file_name);
         };
     }
 
@@ -801,6 +830,97 @@ void TextEditor::writeSettings()
     QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
     settings.setValue("geometry", saveGeometry());
 }
+
+
+
+static inline QString recentFilesKey() { return QStringLiteral("recentFileList"); }
+static inline QString fileKey() { return QStringLiteral("file"); }
+
+static QStringList readRecentFiles(QSettings &settings)
+{
+    QStringList result;
+    const int count = settings.beginReadArray(recentFilesKey());
+    for (int i = 0; i < count; ++i) {
+        settings.setArrayIndex(i);
+        result.append(settings.value(fileKey()).toString());
+    }
+    settings.endArray();
+    return result;
+}
+
+static void writeRecentFiles(const QStringList &files, QSettings &settings)
+{
+    const int count = files.size();
+    settings.beginWriteArray(recentFilesKey());
+    for (int i = 0; i < count; ++i) {
+        settings.setArrayIndex(i);
+        settings.setValue(fileKey(), files.at(i));
+    }
+    settings.endArray();
+}
+
+bool TextEditor::hasRecentFiles()
+{
+    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    const int count = settings.beginReadArray(recentFilesKey());
+    settings.endArray();
+
+    return count > 0;
+}
+
+void TextEditor::prependToRecentFiles(const QString &fileName)
+{
+    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+
+    const QStringList oldRecentFiles = readRecentFiles(settings);
+    QStringList recentFiles = oldRecentFiles;
+    recentFiles.removeAll(fileName);
+    recentFiles.prepend(fileName);
+    if (oldRecentFiles != recentFiles)
+        writeRecentFiles(recentFiles, settings);
+
+    setRecentFilesVisible(!recentFiles.isEmpty());
+}
+
+void TextEditor::setRecentFilesVisible(bool visible)
+{
+    recentFileSubMenuAct->setVisible(visible);
+    recentFileSeparator->setVisible(visible);
+}
+
+void TextEditor::updateRecentFileActions()
+{
+    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+
+    const QStringList recentFiles = readRecentFiles(settings);
+    const int count = qMin(int(MaxRecentFiles), recentFiles.size());
+    int i = 0;
+    for ( ; i < count; ++i) {
+        const QString fileName = QFileInfo(recentFiles.at(i)).fileName();
+        recentFileActs[i]->setText(tr("&%1 %2").arg(i + 1).arg(fileName));
+        recentFileActs[i]->setData(recentFiles.at(i));
+        recentFileActs[i]->setVisible(true);
+    }
+    for ( ; i < MaxRecentFiles; ++i)
+        recentFileActs[i]->setVisible(false);
+}
+
+void TextEditor::openRecentFile()
+{
+    if (uiPtr->textEdit->maybeSave())
+    {
+        if (const QAction *action = qobject_cast<const QAction *>(sender()))
+        {
+            QString file_name = action->data().toString();
+            if (uiPtr->textEdit->loadFile(file_name))
+            {
+                slotRenameTitle();     // вызов функции изменения названия окна
+                statusBar()->showMessage(tr("File loaded"), 2000);
+            };
+        };
+    };
+}
+
 
 
 // *** class SearchHighLight

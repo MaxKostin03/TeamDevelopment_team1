@@ -17,11 +17,13 @@
 
 //#include <QtWebView>
 
+
+QT_BEGIN_NAMESPACE
+
+namespace Ui { class TextEditor; }
 class SearchWidget;
 class SearchHighLight;
 
-QT_BEGIN_NAMESPACE
-namespace Ui { class TextEditor; }
 QT_END_NAMESPACE
 
 
@@ -32,6 +34,7 @@ class TextEditor : public QMainWindow
     Q_OBJECT
 
 public:
+
     TextEditor(QWidget *parent = nullptr);
     ~TextEditor();
 
@@ -85,11 +88,19 @@ private slots:
     void onPurpleColorButtonClicked();
     void onBlackColorButtonClicked();
 
+    void updateRecentFileActions();
+    void openRecentFile();
+
 private:
 
+    enum { MaxRecentFiles = 5 };
+
     Ui::TextEditor *uiPtr;
+
     // QString file_path = ""; // не требуется
+    void createMenu();
     QMenu *menuConfig();
+    QMenu *recentMenu;
     QMenu *editMenu();
     QMenu *formatMenu();
     QMenu *insertMenu();
@@ -98,6 +109,15 @@ private:
     QAction *help();
     QAction *about();
     QToolBar *toolbar();
+
+    QAction *recentFileActs[MaxRecentFiles];
+    QAction *recentFileSeparator;
+    QAction *recentFileSubMenuAct;
+
+
+    static bool hasRecentFiles();
+    void prependToRecentFiles(const QString& );
+    void setRecentFilesVisible(bool );
 
     // bool isFileSaved = true; // не требуется
 
