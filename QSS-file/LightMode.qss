@@ -62,10 +62,10 @@ QMenu
 }
 
 
-QMenu QWidget{
+/*QMenu QWidget{
 	background-color: transparent;
 
-}
+}*/
 
 
 QMenu::separator
