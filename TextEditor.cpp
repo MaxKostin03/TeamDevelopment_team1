@@ -9,7 +9,9 @@
 #include <QFontDialog>
 #include <QTextCharFormat>
 #include <QSettings>
-
+#include <QLabel>
+#include "CalendarWidget.h"
+QPointer<CalendarWidget> calendarWidget;
 
 // *** class TextEditor
 
@@ -17,17 +19,17 @@ TextEditor::TextEditor(QWidget *parent)
     : QMainWindow(parent)
     , uiPtr(new Ui::TextEditor)
     , searchWidget(new SearchWidget)
-{
-    uiPtr->setupUi(this);
-    //this->setWindowTitle(tr("Text Editor"));
 
+{
+
+    uiPtr->setupUi(this);
+    *loc=QLocale::English;
     slotLightMode();
     qtLanguageTranslator.load(":/QtLanguage_ru.qm", ".");
 
     setWindowIcon(QIcon(":/res/Icons-file/file")); // добавление иконки приложения
 
     createMenu();
-    //searchWidget = new SearchWidget;
 
     connect(searchWidget, SIGNAL(signalSearchText(QString)), this, SLOT(slotSearchText(QString))); // подключаем сигнал с текстом поиска для вызова функции поиска текста
     connect(uiPtr->textEdit, &QTextEdit::textChanged, this, &TextEditor::slotRenameTitle);
@@ -39,7 +41,6 @@ TextEditor::TextEditor(QWidget *parent)
     // Устанавливаем контекстное меню для QTextEdit
     uiPtr->textEdit->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(uiPtr->textEdit, &QTextEdit::customContextMenuRequested, this, &TextEditor::slotContextMenu);
-
     createStatusBar();
     readSettings();
 }
@@ -269,7 +270,41 @@ QToolBar *TextEditor::toolbar()     // заполнение в toolbar блок�
     QAction *search = toolbar->addAction(QIcon(":/res/Icons-file/search"), tr("Search text"));     // кнопка вызова окна для поиска текста
     connect(search, &QAction::triggered, this, &TextEditor::slotSearch);
 
+    // Добавление текущей даты
+
+    QFont *setDataFont = new QFont;
+    setDataFont->setPointSize(15);
+    QSizePolicy *policy=new QSizePolicy;
+    policy->setHorizontalPolicy(QSizePolicy::Expanding);
+    QWidget *Date = new QWidget;
+    Date->setSizePolicy(*policy);
+    QLabel *currentDate = new QLabel;
+    currentDate->setFont(*setDataFont);
+    currentDate->setText(QDate::currentDate().toString("dd.MM.yyyy"));
+    toolbar->addWidget(Date);
+    toolbar->addWidget(currentDate);
+
+    QAction *calendar = toolbar->addAction(QIcon(":/res/Icons-file/calendar"), tr("Calendar"));
+    connect(calendar,SIGNAL(triggered(bool)),this,SLOT(openCalendar()));
+
     return toolbar;
+}
+
+     // Календарь
+
+void TextEditor::openCalendar(){
+
+    if(calendarWidget){
+        calendarWidget->raise();
+        calendarWidget->activateWindow();
+    }
+    if(!calendarWidget){
+    calendarWidget=new CalendarWidget(this);
+    calendarWidget->resize(840, 240);
+    calendarWidget->setWindowIcon(QIcon(":/res/Icons-file/calendar"));
+    calendarWidget->setAttribute(Qt::WA_DeleteOnClose);
+    calendarWidget->show();
+    }
 }
 
 void TextEditor::slotRenameTitle()       // функция изменения названия файла
@@ -311,14 +346,15 @@ void TextEditor::slotFileSaveAs()       //функция сохранения с
     }
 }
 
-// Функция экспорта в pdf
+        // Функция экспорта в pdf
+
+
 void TextEditor::slotExportToPdf() {
     uiPtr->textEdit->printPdf();
 }
 
 void TextEditor::slotPrintFile()        // функция печати файла
 {
-
     uiPtr->textEdit->printFile();   // отправка на печать
 }
 
@@ -713,6 +749,7 @@ void TextEditor::slotLightMode()        // функция светлой тем�
 void TextEditor::slotEnglish() {
     qApp->removeTranslator(&qtLanguageTranslator);
     uiPtr->retranslateUi(this);
+    *loc=QLocale::English;
 
     this->setWindowTitle(tr("Text Editor"));
 
@@ -731,6 +768,7 @@ void TextEditor::slotEnglish() {
     uiPtr->menubar->addAction(about());      // добавление в menubar About
     uiPtr->toolBar->addWidget(toolbar());    // Добавить виджет заново
     searchWidget = new SearchWidget;
+    connect(searchWidget, SIGNAL(signalSearchText(QString)), this, SLOT(slotSearchText(QString)));
 
     hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
     window = NULL;          // очищение окна кнопок цветовой палитры
@@ -741,6 +779,7 @@ void TextEditor::slotRussian()
 {
     qApp->installTranslator(&qtLanguageTranslator);
     uiPtr->retranslateUi(this);
+    *loc=QLocale::Russian;
 
     //Настройка перевода динамических элементов
 
@@ -757,6 +796,7 @@ void TextEditor::slotRussian()
     uiPtr->menubar->addAction(about());      // добавление в menubar About
     uiPtr->toolBar->addWidget(toolbar());    // Добавить виджет заново
     searchWidget = new SearchWidget;
+    connect(searchWidget, SIGNAL(signalSearchText(QString)), this, SLOT(slotSearchText(QString)));
 
     hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
     window = NULL;          // очищение окна кнопок цветовой палитры

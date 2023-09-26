@@ -14,6 +14,8 @@
 #include <QSyntaxHighlighter>
 #include <QRegularExpression>
 #include "SearchWidget.h"
+#include <QLocale>
+//#include "CalendarWidget.h"
 
 //#include <QtWebView>
 
@@ -34,11 +36,13 @@ class TextEditor : public QMainWindow
     Q_OBJECT
 
 public:
-
     TextEditor(QWidget *parent = nullptr);
     ~TextEditor();
 
     bool loadFile(const QString&);
+    QLocale *loc = new QLocale;
+
+
     // bool hasUnsavedChanges(); // не требуется
 
 private slots:
@@ -92,6 +96,7 @@ private slots:
 
     void updateRecentFileActions();
     void openRecentFile();
+    void openCalendar();
 
 private:
 
@@ -149,6 +154,7 @@ private:
 
     SearchHighLight* m_searchHighLight;
     SearchWidget *searchWidget;
+    //CalendarWidget *calendarWidget;
 };
 
 // *** class SearchHighLight
