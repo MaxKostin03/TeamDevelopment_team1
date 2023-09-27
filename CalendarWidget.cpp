@@ -103,7 +103,7 @@ void CalendarWidget::insertCalendar() {
         QTextCursor cellCursor = cell.firstCursorPosition();
         cellCursor.setBlockFormat(centerAlignment);
         cellCursor.insertText(QString("%1").
-                              arg(local->dayName(weekDay+1,QLocale::LongFormat)),boldFormat);
+                              arg(local->dayName(weekDay+1,QLocale::ShortFormat)),boldFormat);
     }
 
     table->insertRows(table->rows(), 1); //вставить подписи
