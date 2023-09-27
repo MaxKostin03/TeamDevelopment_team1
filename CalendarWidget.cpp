@@ -113,11 +113,27 @@ void CalendarWidget::insertCalendar() {
         QTextTableCell cell = table->cellAt(table->rows()-1, weekDay-1);
         QTextCursor cellCursor = cell.firstCursorPosition();
         cellCursor.setBlockFormat(rightAlignment);
-        //текущую дату - желтым, иначе обычным
-        if (date == QDate::currentDate())
-            cellCursor.insertText(QString("%1").arg(date.day()), highlightedFormat);
+
+        QTextBlockFormat currentDateFormat;
+        currentDateFormat.setAlignment(Qt::AlignRight);
+        currentDateFormat.setBackground(Qt::yellow);  //текущую дату - желтым, иначе обычным
+
+        QTextCharFormat currentDateTextFormat;
+        currentDateTextFormat.setFontPointSize(fontSize);
+        currentDateTextFormat.setFontWeight(QFont::Thin);
+        currentDateTextFormat.setTextOutline(QPen(Qt::blue));
+
+        QTextCharFormat otherDateTextFormat;
+        otherDateTextFormat.setFontPointSize(fontSize);
+        otherDateTextFormat.setFontWeight(QFont::Thin);
+        otherDateTextFormat.setTextOutline(QPen(QColor(0,0,205)));
+
+        if (date == QDate::currentDate()){
+         cellCursor.insertText(QString("%1").arg(date.day()),currentDateTextFormat);
+         cellCursor.setBlockFormat(currentDateFormat);
+        }
         else
-            cellCursor.insertText(QString("%1").arg(date.day()), format);
+         cellCursor.insertText(QString("%1").arg(date.day()), otherDateTextFormat);
         date = date.addDays(1); //следующий день
         if (weekDay == 7 && date.month() == selectedDate.month())
             table->insertRows(table->rows(), 1); //добавить строчку, если пора
