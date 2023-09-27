@@ -300,7 +300,7 @@ void TextEditor::openCalendar(){
     }
     if(!calendarWidget){
     calendarWidget=new CalendarWidget(this);
-    calendarWidget->resize(840, 240);
+    calendarWidget->resize(300, 230);
     calendarWidget->setWindowIcon(QIcon(":/res/Icons-file/calendar"));
     calendarWidget->setAttribute(Qt::WA_DeleteOnClose);
     calendarWidget->show();
