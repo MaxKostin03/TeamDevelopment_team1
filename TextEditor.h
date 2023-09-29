@@ -71,6 +71,7 @@ private slots:
     void slotLeftSide();
     void slotInTheCenter();
     void slotRightSide();
+    void slotTextBackgroundColor();
     void slotInsertImage();
     void slotInsertFormula();
     void slotDarkMode();

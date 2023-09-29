@@ -11,7 +11,11 @@
 #include <QSettings>
 #include <QLabel>
 #include "CalendarWidget.h"
+#include <QColorDialog>
+#include <QLibraryInfo>
+#include <QApplication>
 QPointer<CalendarWidget> calendarWidget;
+QLocale *local = new QLocale;
 
 // *** class TextEditor
 
@@ -20,10 +24,12 @@ TextEditor::TextEditor(QWidget *parent)
     , uiPtr(new Ui::TextEditor)
     , searchWidget(new SearchWidget)
 
+
 {
 
     uiPtr->setupUi(this);
     *loc=QLocale::English;
+    *local=QLocale::English;
     slotLightMode();
     qtLanguageTranslator.load(":/QtLanguage_ru.qm", ".");
 
@@ -125,7 +131,8 @@ QMenu *TextEditor::formatMenu()     // заполнение меню Format
     menuFormatPtr->addAction(tr("Crossed"),this, &TextEditor::slotCrossedOut)->setIcon(QIcon(":/res/Icons-file/cross-out"));             // кнопка вызова функции зачеркнутого шрифта
     menuFormatPtr->addSeparator();
     menuFormatPtr->addAction(tr("Font style"), this, &TextEditor::slotFontStyle)->setIcon(QIcon(":/res/Icons-file/font-adjustment"));    // кнопка вызова функции изменения стиля шрифта
-    menuFormatPtr->addAction(tr("Font color"), this, &TextEditor::slotFontColor)->setIcon(QIcon(":/res/Icons-file/color-text"));         // кнопка вызова функции изменения цвета шрифта
+    menuFormatPtr->addAction(tr("Font color"), this, &TextEditor::slotFontColor)->setIcon(QIcon(":/res/Icons-file/color-text"));
+    menuFormatPtr->addAction(tr("Background color"), this, &TextEditor::slotTextBackgroundColor)->setIcon(QIcon(":/res/Icons-file/background_color"));  //кнопка вызова функции изменения цвета фона текста
     menuFormatPtr->addAction(tr("Align left"), this, &TextEditor::slotLeftSide)->setIcon(QIcon(":/res/Icons-file/AlignLeft"));          // кнопка вызова функции выравнивания текста по левому краю
     menuFormatPtr->addAction(tr("Align center"), this, &TextEditor::slotInTheCenter)->setIcon(QIcon(":/res/Icons-file/AlignCenter"));    // кнопка вызова функции выравнивания текста по центру
     menuFormatPtr->addAction(tr("Align right"), this, &TextEditor::slotRightSide)->setIcon(QIcon(":/res/Icons-file/AlignRight"));       // кнопка вызова функции выравнивания текста по правому краю
@@ -249,6 +256,9 @@ QToolBar *TextEditor::toolbar()     // заполнение в toolbar блок�
 
     QAction *font_color = toolbar->addAction(QIcon(":/res/Icons-file/color-text"), tr("Font color"));           // кнопка вызова функции изменения цвета шрифта
     connect(font_color, &QAction::triggered, this, &TextEditor::slotFontColor);
+
+    QAction *background_color = toolbar->addAction(QIcon(":/res/Icons-file/background_color"), tr("Background color"));     // кнопка вызова функции цвета фона текста
+    connect(background_color, &QAction::triggered, this, &TextEditor::slotTextBackgroundColor);
 
     QAction *align_left = toolbar->addAction(QIcon(":/res/Icons-file/AlignLeft"), tr("Align left"));             // кнопка вызова функции выравнивания текста по левому краю
     connect(align_left, &QAction::triggered, this, &TextEditor::slotLeftSide);
@@ -604,6 +614,46 @@ void TextEditor::slotRightSide()                              // функция 
     uiPtr->textEdit->setTextCursor(cursor);
 }
 
+QColor selectBackgroundColor()                   //цветовая палитра
+{
+    QString *QColorTitleName = new QString;
+    QString *languageSelect = new QString;
+    if(local->languageToString(local->language())=="English"){
+        *QColorTitleName="Select Background Color";
+        *languageSelect="en_EN";
+    }
+    else{
+        *QColorTitleName="Выберите цвет фона";
+        *languageSelect="ru_RU";
+    }
+
+    QTranslator qtTranslator;
+    if (qtTranslator.load("qt_" + *languageSelect, QLibraryInfo::path(QLibraryInfo::TranslationsPath)))
+        qApp->installTranslator(&qtTranslator);
+    QColorDialog colorDialog;
+    QWidget *WidgetforIcon=new QWidget;
+    WidgetforIcon->setWindowIcon(QIcon(":/res/Icons-file/background_color"));
+    QColor selectedColor = colorDialog.getColor(Qt::red, WidgetforIcon, *QColorTitleName);
+
+
+    return selectedColor;
+}
+
+void TextEditor::slotTextBackgroundColor()                         //функция вызова функции изменения цвета фона текста
+{
+    QTextCharFormat format;
+    QColor backgroundColor = selectBackgroundColor();
+
+    if (!backgroundColor.isValid()) {                          //если пользователь отменил выбор
+        return;
+    }
+
+    format.setBackground(backgroundColor);                         //установка цвета фона текста
+    QTextCursor cursor = uiPtr->textEdit->textCursor();
+    cursor.setCharFormat(format);
+    uiPtr->textEdit->setTextCursor(cursor);
+}
+
 void TextEditor::slotInsertImage()      // функция добавления изображения
 {
     QString file_path = QFileDialog::getOpenFileName(this, tr("Open the file"));
@@ -750,6 +800,7 @@ void TextEditor::slotEnglish() {
     qApp->removeTranslator(&qtLanguageTranslator);
     uiPtr->retranslateUi(this);
     *loc=QLocale::English;
+    *local=QLocale::English;
 
     this->setWindowTitle(tr("Text Editor"));
 
@@ -780,6 +831,7 @@ void TextEditor::slotRussian()
     qApp->installTranslator(&qtLanguageTranslator);
     uiPtr->retranslateUi(this);
     *loc=QLocale::Russian;
+    *local=QLocale::Russian;
 
     //Настройка перевода динамических элементов
 
