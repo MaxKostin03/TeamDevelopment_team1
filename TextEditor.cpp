@@ -579,14 +579,6 @@ void TextEditor::slotFontStyle()        // функция изменения с�
     else return;                                    // если Cansel - выйти
 }
 
-void TextEditor::slotFontColor()        // функция изменения цвета шрифта
-{
-
-    QPoint Pos = mapFromGlobal(QCursor::pos());
-    createColorPalette(Pos.x() , Pos.y()-(uiPtr->toolBar->height()));   // вызов функции выбора цветовой палитры
-
-}
-
 void TextEditor::slotLeftSide()                               // функция выравнивания текста по левому краю
 {
     QTextCursor cursor = uiPtr->textEdit->textCursor();
@@ -614,45 +606,86 @@ void TextEditor::slotRightSide()                              // функция 
     uiPtr->textEdit->setTextCursor(cursor);
 }
 
-QColor selectBackgroundColor()                   //цветовая палитра
+QColor TextEditor::selectColor(QString QColorTitleName, QString WindowIconPath)                   //цветовая палитра
 {
-    QString *QColorTitleName = new QString;
     QString *languageSelect = new QString;
     if(local->languageToString(local->language())=="English"){
-        *QColorTitleName="Select Background Color";
         *languageSelect="en_EN";
     }
     else{
-        *QColorTitleName="Выберите цвет фона";
         *languageSelect="ru_RU";
     }
 
     QTranslator qtTranslator;
     if (qtTranslator.load("qt_" + *languageSelect, QLibraryInfo::path(QLibraryInfo::TranslationsPath)))
         qApp->installTranslator(&qtTranslator);
+
     QColorDialog colorDialog;
     QWidget *WidgetforIcon=new QWidget;
-    WidgetforIcon->setWindowIcon(QIcon(":/res/Icons-file/background_color"));
-    QColor selectedColor = colorDialog.getColor(Qt::red, WidgetforIcon, *QColorTitleName);
+    WidgetforIcon->setWindowIcon(QIcon(WindowIconPath));
+    QColor selectedColor = colorDialog.getColor(Qt::red, WidgetforIcon, QColorTitleName);
 
 
     return selectedColor;
 }
 
-void TextEditor::slotTextBackgroundColor()                         //функция вызова функции изменения цвета фона текста
+void TextEditor::slotFontColor()
 {
-    QTextCharFormat format;
-    QColor backgroundColor = selectBackgroundColor();
+    QTextCursor cursor = uiPtr->textEdit->textCursor();
 
-    if (!backgroundColor.isValid()) {                          //если пользователь отменил выбор
+    QTextCharFormat originalFormat = cursor.charFormat();
+
+    QString QColorTitleName = tr("Select Text Color");
+    QString WigdetIconPath = ":/res/Icons-file/color-text";
+    QColor textColor = selectColor(QColorTitleName, WigdetIconPath);
+
+    if (!textColor.isValid()) {
         return;
     }
 
-    format.setBackground(backgroundColor);                         //установка цвета фона текста
-    QTextCursor cursor = uiPtr->textEdit->textCursor();
-    cursor.setCharFormat(format);
+    QTextCharFormat newFormat;
+    newFormat.setForeground(QBrush(textColor));
+    cursor.mergeCharFormat(newFormat);
+
+    cursor.setPosition(cursor.selectionStart());
+    cursor.setPosition(cursor.selectionEnd(), QTextCursor::KeepAnchor);
+    cursor.setCharFormat(originalFormat);
+
+    cursor.setPosition(cursor.selectionEnd());
+
     uiPtr->textEdit->setTextCursor(cursor);
 }
+
+void TextEditor::slotTextBackgroundColor()
+{
+    QTextCursor cursor = uiPtr->textEdit->textCursor();
+
+    QTextCharFormat originalFormat = cursor.charFormat();
+
+    QString selectedText = cursor.selectedText();
+    QTextCharFormat selectedTextFormat = cursor.charFormat();
+
+    QString QColorTitleName = tr("Select Background Color");
+    QString WigdetIconPath = ":/res/Icons-file/background_color";
+    QColor backgroundColor = selectColor(QColorTitleName, WigdetIconPath);
+
+    if (!backgroundColor.isValid()) {
+        return;
+    }
+
+    QTextCharFormat newFormat;
+    newFormat.setBackground(QBrush(backgroundColor));
+    cursor.mergeCharFormat(newFormat);
+
+    cursor.setPosition(cursor.selectionStart());
+    cursor.setPosition(cursor.selectionEnd(), QTextCursor::KeepAnchor);
+    cursor.setCharFormat(selectedTextFormat);
+
+    cursor.setPosition(cursor.selectionEnd());
+
+    uiPtr->textEdit->setTextCursor(cursor);
+}
+
 
 void TextEditor::slotInsertImage()      // функция добавления изображения
 {
