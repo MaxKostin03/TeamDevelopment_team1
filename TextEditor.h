@@ -98,7 +98,6 @@ private slots:
     void updateRecentFileActions();
     void openRecentFile();
     void openCalendar();
-
 private:
 
     enum { MaxRecentFiles = 5 };
@@ -145,6 +144,7 @@ private:
     void readSettings();
     void writeSettings();
 
+    QColor selectColor(QString QColorTitleName, QString WindowIconPath);
     void setPaletteColors();
     void createColorPalette(qint32 x ,qint32 y , qint32 width=200 , qint32 height=100);
     void hidePalette(QWidget *window);

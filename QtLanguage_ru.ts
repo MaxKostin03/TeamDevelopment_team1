@@ -101,7 +101,7 @@ Do you want to save your changes?</source>
         <translation>Панель инструментов</translation>
     </message>
     <message>
-        <location filename="TextEditor.cpp" line="805"/>
+        <location filename="TextEditor.cpp" line="818"/>
         <source>Text Editor</source>
         <translation>Текстовый редактор</translation>
     </message>
@@ -162,41 +162,41 @@ Do you want to save your changes?</source>
     <message>
         <location filename="TextEditor.cpp" line="112"/>
         <location filename="TextEditor.cpp" line="215"/>
-        <location filename="TextEditor.cpp" line="733"/>
+        <location filename="TextEditor.cpp" line="746"/>
         <source>Undo</source>
         <translation>Отменить</translation>
     </message>
     <message>
         <location filename="TextEditor.cpp" line="113"/>
         <location filename="TextEditor.cpp" line="218"/>
-        <location filename="TextEditor.cpp" line="737"/>
+        <location filename="TextEditor.cpp" line="750"/>
         <source>Redo</source>
         <translation>Вернуть</translation>
     </message>
     <message>
         <location filename="TextEditor.cpp" line="114"/>
         <location filename="TextEditor.cpp" line="221"/>
-        <location filename="TextEditor.cpp" line="747"/>
+        <location filename="TextEditor.cpp" line="760"/>
         <source>Copy</source>
         <translation>Копировать</translation>
     </message>
     <message>
         <location filename="TextEditor.cpp" line="115"/>
         <location filename="TextEditor.cpp" line="224"/>
-        <location filename="TextEditor.cpp" line="743"/>
+        <location filename="TextEditor.cpp" line="756"/>
         <source>Cut</source>
         <translation>Вырезать</translation>
     </message>
     <message>
         <location filename="TextEditor.cpp" line="116"/>
         <location filename="TextEditor.cpp" line="227"/>
-        <location filename="TextEditor.cpp" line="751"/>
+        <location filename="TextEditor.cpp" line="764"/>
         <source>Paste</source>
         <translation>Вставить</translation>
     </message>
     <message>
         <location filename="TextEditor.cpp" line="118"/>
-        <location filename="TextEditor.cpp" line="761"/>
+        <location filename="TextEditor.cpp" line="774"/>
         <source>Select All</source>
         <translation>Выделить всё</translation>
     </message>
@@ -314,13 +314,13 @@ Do you want to save your changes?</source>
     </message>
     <message>
         <location filename="TextEditor.cpp" line="178"/>
-        <location filename="TextEditor.cpp" line="863"/>
+        <location filename="TextEditor.cpp" line="876"/>
         <source>Help</source>
         <translation>Справка</translation>
     </message>
     <message>
         <location filename="TextEditor.cpp" line="187"/>
-        <location filename="TextEditor.cpp" line="891"/>
+        <location filename="TextEditor.cpp" line="904"/>
         <source>About</source>
         <translation>О программе</translation>
     </message>
@@ -374,7 +374,7 @@ Do you want to save your changes?</source>
     </message>
     <message>
         <location filename="TextEditor.cpp" line="277"/>
-        <location filename="TextEditor.cpp" line="686"/>
+        <location filename="TextEditor.cpp" line="699"/>
         <source>Insert formula</source>
         <translation>Вставка формулы</translation>
     </message>
@@ -386,7 +386,7 @@ Do you want to save your changes?</source>
     <message>
         <location filename="TextEditor.cpp" line="297"/>
         <source>Calendar</source>
-        <translation type="unfinished"></translation>
+        <translation>Календарь</translation>
     </message>
     <message>
         <location filename="TextEditor.cpp" line="347"/>
@@ -395,18 +395,28 @@ Do you want to save your changes?</source>
         <translation>Файл сохранен</translation>
     </message>
     <message>
-        <location filename="TextEditor.cpp" line="1042"/>
-        <location filename="TextEditor.cpp" line="1175"/>
+        <location filename="TextEditor.cpp" line="640"/>
+        <source>Select Text Color</source>
+        <translation>Выбор цвета текста</translation>
+    </message>
+    <message>
+        <location filename="TextEditor.cpp" line="658"/>
+        <source>Select Background Color</source>
+        <translation>Выберите цвет фона</translation>
+    </message>
+    <message>
+        <location filename="TextEditor.cpp" line="1055"/>
+        <location filename="TextEditor.cpp" line="1188"/>
         <source>File loaded</source>
         <translation>Файл загружен</translation>
     </message>
     <message>
-        <location filename="TextEditor.cpp" line="1067"/>
+        <location filename="TextEditor.cpp" line="1080"/>
         <source>Ready</source>
         <translation>Готово</translation>
     </message>
     <message>
-        <location filename="TextEditor.cpp" line="1157"/>
+        <location filename="TextEditor.cpp" line="1170"/>
         <source>&amp;%1 %2</source>
         <translation>&amp;%1 %2</translation>
     </message>
@@ -441,8 +451,8 @@ Do you want to save your changes?</source>
         <translation type="vanished">Нет</translation>
     </message>
     <message>
-        <location filename="TextEditor.cpp" line="659"/>
-        <location filename="TextEditor.cpp" line="1037"/>
+        <location filename="TextEditor.cpp" line="672"/>
+        <location filename="TextEditor.cpp" line="1050"/>
         <source>Open the file</source>
         <translation>Отрыть файл</translation>
     </message>
@@ -471,7 +481,7 @@ Do you want to save your changes?</source>
         <translation type="vanished">У вас есть несохраненные изменения. Вы хотите сохранить их?</translation>
     </message>
     <message>
-        <location filename="TextEditor.cpp" line="675"/>
+        <location filename="TextEditor.cpp" line="688"/>
         <source>This window is intended for entering mathematical formulas. You can use the following operators:
   - Addition: +;
   - Subtraction: -;
@@ -504,12 +514,12 @@ Enter your formula:</oldsource>
 Введите вашу формулу:</translation>
     </message>
     <message>
-        <location filename="TextEditor.cpp" line="755"/>
+        <location filename="TextEditor.cpp" line="768"/>
         <source>Delete</source>
         <translation>Удалить</translation>
     </message>
     <message>
-        <location filename="TextEditor.cpp" line="864"/>
+        <location filename="TextEditor.cpp" line="877"/>
         <source>Create file (Ctrl+N)
 Open file (Ctrl+O)
 Save file (Ctrl+S)
@@ -543,13 +553,13 @@ Underline text (Ctrl+U)
 Подчеркивание текста (Ctrl+U)</translation>
     </message>
     <message>
-        <location filename="TextEditor.cpp" line="892"/>
+        <location filename="TextEditor.cpp" line="905"/>
         <source>Text Editor version 1.0
 </source>
         <translation>Text Editor версия 1.0</translation>
     </message>
     <message>
-        <location filename="TextEditor.cpp" line="998"/>
+        <location filename="TextEditor.cpp" line="1011"/>
         <source>Palette</source>
         <translation>Палитра</translation>
     </message>
