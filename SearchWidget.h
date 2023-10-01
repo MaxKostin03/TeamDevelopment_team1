@@ -1,29 +1,33 @@
-#ifndef SEARCHWIDGET_H
-#define SEARCHWIDGET_H
+#ifndef SEARCH_WIDGET_H
+#define SEARCH_WIDGET_H
 
 #include <QWidget>
 #include <QDialog>
 
-namespace Ui {
-class SearchWidget;
-}
+#include "ui_SearchWidget.h"
+
+QT_BEGIN_NAMESPACE
+namespace Ui { class SearchWidget; }
+QT_END_NAMESPACE
 
 class SearchWidget : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit SearchWidget(QDialog *parent = nullptr);
+
+    SearchWidget(QDialog *parent = nullptr);
     ~SearchWidget();
 
 signals:
+
     void signalSearchText(QString text);
 
 private:
-    void onSearchText();
 
+    void onSearchText();
     Ui::SearchWidget *ui;
 
 };
 
-#endif // SEARCHWIDGET_H
+#endif // SEARCH_WIDGET_H

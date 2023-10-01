@@ -1,5 +1,5 @@
-#ifndef TEXTEDITOR_H
-#define TEXTEDITOR_H
+#ifndef TEXT_EDITOR_H
+#define TEXT_EDITOR_H
 
 #include <QMainWindow>
 #include <QMenu>
@@ -10,22 +10,18 @@
 #include <QDialogButtonBox>
 #include <QComboBox>
 #include <QTranslator>
-#include <QRegularExpression>
-#include <QSyntaxHighlighter>
-#include <QRegularExpression>
-#include "SearchWidget.h"
 #include <QLocale>
-//#include "CalendarWidget.h"
-
 //#include <QtWebView>
 
 
+#include "ui_TextEditor.h"
+#include "SearchHighLight.h"
+#include "SearchWidget.h"
+//#include "CalendarWidget.h"
+
 QT_BEGIN_NAMESPACE
-
 namespace Ui { class TextEditor; }
-class SearchWidget;
-class SearchHighLight;
-
+//class CalendarWidget;
 QT_END_NAMESPACE
 
 
@@ -40,7 +36,7 @@ public:
     ~TextEditor();
 
     bool loadFile(const QString&);
-    QLocale *loc = new QLocale;
+    QLocale *loc;
 
 
     // bool hasUnsavedChanges(); // не требуется
@@ -98,6 +94,7 @@ private slots:
     void updateRecentFileActions();
     void openRecentFile();
     void openCalendar();
+
 private:
 
     enum { MaxRecentFiles = 5 };
@@ -158,27 +155,6 @@ private:
     //CalendarWidget *calendarWidget;
 };
 
-// *** class SearchHighLight
 
-class SearchHighLight : public QSyntaxHighlighter
-{
-    Q_OBJECT
-    using BaseClass = QSyntaxHighlighter;
 
-public:
-
-    explicit SearchHighLight(QTextDocument* parent = nullptr);
-    void searchText(const QString& text);
-
-protected:
-
-    virtual void highlightBlock(const QString &text) override;
-
-private:
-
-    QRegularExpression m_pattern; // Regular expression to search for, in our case, this word or text
-    QTextCharFormat m_format; // Text formatting, highlighting
-
-};
-
-#endif // TEXTEDITOR_H
+#endif // TEXT_EDITOR_H
