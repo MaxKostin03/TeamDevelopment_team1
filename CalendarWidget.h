@@ -1,27 +1,38 @@
-#ifndef CALENDARWIDGET_H
-#define CALENDARWIDGET_H
+#ifndef CALENDAR_WIDGET_H
+#define CALENDAR_WIDGET_H
 
 #include <QMainWindow>
 #include <QDate>
-#include <Qdialog>
-#include <TextEditor.h>
+#include <QDialog>
+#include <QTextBrowser>
 
-class QTextBrowser;
+#include "TextEditor.h"
 
-class CalendarWidget : public QMainWindow {
+QT_BEGIN_NAMESPACE
+QT_END_NAMESPACE
+
+class CalendarWidget : public QMainWindow
+{
     Q_OBJECT
+
 public:
+
     CalendarWidget(TextEditor *parent);
     QLocale *local = new QLocale;
+
 public slots:
+
     void setFontSize(int size); //выбор шрифта
     void setMonth(int month); //выбор месяца
     void setYear(QDate date); //выбор года
+
 private:
+
     void insertCalendar();
     int fontSize;
     QDate selectedDate;
     QTextBrowser *editor;
+
 };
 
-#endif
+#endif // CALENDAR_WIDGET_H

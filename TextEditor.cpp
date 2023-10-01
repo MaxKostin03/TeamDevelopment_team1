@@ -1,6 +1,3 @@
-#include "TextEditor.h"
-#include "ui_TextEditor.h"
-
 #include <QFile>
 #include <QFileDialog>
 #include <QTextStream>
@@ -10,10 +7,13 @@
 #include <QTextCharFormat>
 #include <QSettings>
 #include <QLabel>
-#include "CalendarWidget.h"
 #include <QColorDialog>
 #include <QLibraryInfo>
 #include <QApplication>
+
+#include "TextEditor.h"
+#include "CalendarWidget.h"
+
 QPointer<CalendarWidget> calendarWidget;
 QLocale *local = new QLocale;
 
@@ -21,6 +21,7 @@ QLocale *local = new QLocale;
 
 TextEditor::TextEditor(QWidget *parent)
     : QMainWindow(parent)
+    , loc(new QLocale)
     , uiPtr(new Ui::TextEditor)
     , searchWidget(new SearchWidget)
 
@@ -28,6 +29,7 @@ TextEditor::TextEditor(QWidget *parent)
 {
 
     uiPtr->setupUi(this);
+
     *loc=QLocale::English;
     *local=QLocale::English;
     slotLightMode();
@@ -53,8 +55,9 @@ TextEditor::TextEditor(QWidget *parent)
 
 TextEditor::~TextEditor()
 {
-    delete uiPtr;
     delete searchWidget;
+    delete uiPtr;
+    delete loc;
 }
 
 void TextEditor::createMenu()
@@ -302,8 +305,8 @@ QToolBar *TextEditor::toolbar()     // заполнение в toolbar блок�
 
      // Календарь
 
-void TextEditor::openCalendar(){
-
+void TextEditor::openCalendar()
+{
     if(calendarWidget){
         calendarWidget->raise();
         calendarWidget->activateWindow();
@@ -339,8 +342,6 @@ void TextEditor::slotFileNew()      // функция создания ново�
     }
 }
 
-
-
 void TextEditor::slotFileSave()     // функция сохранения файла
 {
     if (uiPtr->textEdit->save())
@@ -356,10 +357,9 @@ void TextEditor::slotFileSaveAs()       //функция сохранения с
     }
 }
 
-        // Функция экспорта в pdf
-
-
-void TextEditor::slotExportToPdf() {
+// Функция экспорта в pdf
+void TextEditor::slotExportToPdf()
+{
     uiPtr->textEdit->printPdf();
 }
 
@@ -409,7 +409,8 @@ void TextEditor::slotSelectAll()        // функция выделить вс�
     uiPtr->textEdit->selectAll();
 }
 
-void TextEditor::slotDelete(){
+void TextEditor::slotDelete()
+{
     QTextCursor cursor = uiPtr->textEdit->textCursor();
 
     if (cursor.hasSelection()) {
@@ -417,7 +418,8 @@ void TextEditor::slotDelete(){
     }
 }
 
-void TextEditor::slotBold() {
+void TextEditor::slotBold()
+{
     QTextCursor cursor = uiPtr->textEdit->textCursor();
 
     if (!cursor.hasSelection()) return;
@@ -455,7 +457,8 @@ void TextEditor::slotBold() {
     uiPtr->textEdit->setTextCursor(cursor);
 }
 
-void TextEditor::slotItalic() {
+void TextEditor::slotItalic()
+{
     QTextCursor cursor = uiPtr->textEdit->textCursor();
 
     if (!cursor.hasSelection()) return;
@@ -625,7 +628,6 @@ QColor TextEditor::selectColor(QString QColorTitleName, QString WindowIconPath) 
     WidgetforIcon->setWindowIcon(QIcon(WindowIconPath));
     QColor selectedColor = colorDialog.getColor(Qt::red, WidgetforIcon, QColorTitleName);
 
-
     return selectedColor;
 }
 
@@ -760,7 +762,8 @@ void TextEditor::slotSearch()       // функция вызова окна дл
     m_searchHighLight = new SearchHighLight(uiPtr->textEdit->document());
 }
 
-void TextEditor::slotContextMenu(const QPoint& pos) {
+void TextEditor::slotContextMenu(const QPoint& pos)
+{
     QMenu *contextMenu = new QMenu(this);
 
     QAction *undoAction = new QAction(tr("Undo"), this);
@@ -829,7 +832,8 @@ void TextEditor::slotLightMode()        // функция светлой тем�
     }
 }
 
-void TextEditor::slotEnglish() {
+void TextEditor::slotEnglish()
+{
     qApp->removeTranslator(&qtLanguageTranslator);
     uiPtr->retranslateUi(this);
     *loc=QLocale::English;
@@ -887,7 +891,9 @@ void TextEditor::slotRussian()
     window = NULL;          // очищение окна кнопок цветовой палитры
 }
 
-void TextEditor::slotHelp(){                  //функция Help
+void TextEditor::slotHelp()
+{   // функция Help
+
     QVBoxLayout *textHelp=new QVBoxLayout;
     QTextEdit *textEdit=new QTextEdit;
     textHelp->addWidget(textEdit);
@@ -915,7 +921,9 @@ void TextEditor::slotHelp(){                  //функция Help
     helpWidget->show();
 }
 
-void TextEditor::slotAbout(){                  //функция About
+void TextEditor::slotAbout()
+{   // функция About
+
     QVBoxLayout *textAbout=new QVBoxLayout;
     QTextEdit *textEdit=new QTextEdit;
     textAbout->addWidget(textEdit);
@@ -929,7 +937,8 @@ void TextEditor::slotAbout(){                  //функция About
     aboutWidget->show();
 }
 
-void TextEditor::setPaletteColors(){        // функция установки цвета отображаемых кнопок
+void TextEditor::setPaletteColors()
+{   // функция установки цвета отображаемых кнопок
 
     redColorButton->setStyleSheet("background:red;");
     orangeColorButton->setStyleSheet("background:orange;");
@@ -997,11 +1006,14 @@ void TextEditor::onBlackColorButtonClicked()        // функция устан
     hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
 }
 
-void TextEditor::createColorPalette(qint32 x ,qint32 y , qint32 height , qint32 width){     // функция выбора цветовой палитры
+void TextEditor::createColorPalette(qint32 x ,qint32 y , qint32 height , qint32 width)
+{   // функция выбора цветовой палитры
 
-    if(window == NULL)  window = new QWidget(uiPtr->centralwidget);     // создание нового окна для кнопок цветовой палитры
+    if(window == NULL)
+        window = new QWidget(uiPtr->centralwidget); // создание нового окна для кнопок цветовой палитры
+
     window->setMaximumSize(height,width);
-    window->setGeometry(QRect(x,y,height,width));                       // установка положения и размеров окна для кнопок цветовой палитры
+    window->setGeometry(QRect(x,y,height,width));   // установка положения и размеров окна для кнопок цветовой палитры
 
     redColorButton = new QPushButton(this);
     QObject::connect(redColorButton,&QPushButton::clicked, this, &TextEditor::onRedColorButtonClicked);         // кнопка вызова функции красного цвета шрифта
@@ -1054,16 +1066,19 @@ void TextEditor::createColorPalette(qint32 x ,qint32 y , qint32 height , qint32 
 
 }
 
-void TextEditor::hidePalette(QWidget *window){      // функция скрытия окна кнопок цветовой палитры
+void TextEditor::hidePalette(QWidget *window)
+{   // функция скрытия окна кнопок цветовой палитры
     if(window !=NULL && window->isVisible())
         window->hide();   // если окно видимо - скрыть
 }
-void TextEditor::showPalette(QWidget *window){      // функция показа окна кнопок цветовой палитры
+void TextEditor::showPalette(QWidget *window)
+{   // функция показа окна кнопок цветовой палитры
     if(window !=NULL)
         window->show();       // показать окно
 }
 
-void TextEditor::slotFileOpen() {
+void TextEditor::slotFileOpen()
+{
 
     if (uiPtr->textEdit->maybeSave())
     {
@@ -1210,29 +1225,3 @@ void TextEditor::openRecentFile()
         };
     };
 }
-
-
-
-// *** class SearchHighLight
-
-SearchHighLight::SearchHighLight(QTextDocument* parent) : BaseClass(parent)
-{
-    m_format.setBackground(Qt::green);
-}
-
-void SearchHighLight::highlightBlock(const QString& text)
-{
-    QRegularExpressionMatchIterator matchIterator = m_pattern.globalMatch(text);
-    while (matchIterator.hasNext())
-    {
-        QRegularExpressionMatch match = matchIterator.next();
-        setFormat(match.capturedStart(), match.capturedLength(), m_format);
-    }
-}
-
-void SearchHighLight::searchText(const QString& text)
-{
-    m_pattern = QRegularExpression(text);
-    rehighlight(); // Перезапускаем подсветку
-}
-
