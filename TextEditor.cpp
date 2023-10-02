@@ -24,8 +24,7 @@ TextEditor::TextEditor(QWidget *parent)
     , loc(new QLocale)
     , uiPtr(new Ui::TextEditor)
     , searchWidget(new SearchWidget)
-
-
+    , formulaWidget(new FormulaWidget)
 {
 
     uiPtr->setupUi(this);
@@ -55,7 +54,9 @@ TextEditor::TextEditor(QWidget *parent)
 
 TextEditor::~TextEditor()
 {
+    delete m_searchHighLight;
     delete searchWidget;
+    delete formulaWidget;
     delete uiPtr;
     delete loc;
 }
@@ -292,7 +293,7 @@ QToolBar *TextEditor::toolbar()     // заполнение в toolbar блок�
     QWidget *Date = new QWidget;
     Date->setSizePolicy(*policy);
     QLabel *currentDate = new QLabel;
-    currentDate->setFont(*setDataFont);
+    currentDate->setStyleSheet("color: rgb(255, 255, 255)");
     currentDate->setText(QDate::currentDate().toString("dd.MM.yyyy"));
     toolbar->addWidget(Date);
     toolbar->addWidget(currentDate);
@@ -313,7 +314,7 @@ void TextEditor::openCalendar()
     }
     if(!calendarWidget){
     calendarWidget=new CalendarWidget(this);
-    calendarWidget->resize(300, 230);
+    calendarWidget->resize(350, 260);
     calendarWidget->setWindowIcon(QIcon(":/res/Icons-file/calendar"));
     calendarWidget->setAttribute(Qt::WA_DeleteOnClose);
     calendarWidget->show();
@@ -667,7 +668,7 @@ void TextEditor::slotTextBackgroundColor()
     QString selectedText = cursor.selectedText();
     QTextCharFormat selectedTextFormat = cursor.charFormat();
 
-    QString QColorTitleName = tr("Select Background Color");
+    QString QColorTitleName = tr("Select background color");
     QString WigdetIconPath = ":/res/Icons-file/background_color";
     QColor backgroundColor = selectColor(QColorTitleName, WigdetIconPath);
 
@@ -688,7 +689,6 @@ void TextEditor::slotTextBackgroundColor()
     uiPtr->textEdit->setTextCursor(cursor);
 }
 
-
 void TextEditor::slotInsertImage()      // функция добавления изображения
 {
     QString file_path = QFileDialog::getOpenFileName(this, tr("Open the file"));
@@ -704,63 +704,30 @@ void TextEditor::slotInsertImage()      // функция добавления �
     uiPtr->textEdit->textCursor().insertImage(img_fmt); // вставка изображения
 }
 
-void TextEditor::slotInsertFormula()
-{
-    bool ok;
-    QString introductoryText = tr("This window is intended for entering mathematical formulas. You can use the following operators:\n"
-                                  "  - Addition: +;\n"
-                                  "  - Subtraction: -;\n"
-                                  "  - Multiplication: *;\n"
-                                  "  - Division: /;\n"
-                                  "  - Degree: a^b (for example, 2^3 for 2 to the power of 3);\n"
-                                  "  - Using trigonometric formulas (e.g. sin, cos, tan, con, sec, cosec);\n"
-                                  "  - Root: sqrt(a) (for example, sqrt(16) for the square root of 16);\n"
-                                  "  - Using the constant π instead of PI.\n"
-                                  "Enter your formula:");
-
-    QString formula = QInputDialog::getText(this, tr("Insert formula"), introductoryText, QLineEdit::Normal, QString(), &ok);
-
-    if (ok && !formula.isEmpty())
-    {
-        // Заменяем базовые операторы на их HTML-эквиваленты
-        formula.replace("&", "&amp;"); // Экранируем символ & как &amp;
-        formula.replace("+", "&#43;"); // Замена + на HTML-код
-        formula.replace("-", "&#8722;"); // Замена - на HTML-код
-        formula.replace("*", "&#215;"); // Замена * на HTML-код
-        //formula.replace("/", "&#247;"); // Замена / на HTML-код
-        formula.replace("PI", "π");
-
-        // Парсинг и форматирование математического выражения
-        formula.replace(QRegularExpression("([a-zA-Z0-9]+)\\(([^)]+)\\)\\^(\\d+)"), "\\1(\\2)<sup>\\3</sup>"); // Регулярное выражение для степени после скобок
-
-        formula.replace("sqrt", "<span>&radic;</span>");     // Регулярное выражение для корня
-        formula.replace(QRegularExpression("(\\w+)\\^(\\w+)"), "\\1<sup>\\2</sup>");     // Регулярное выражение для степени
-
-        formula.replace(QRegularExpression("([a-zA-Z0-9]+)\\s*/\\s*([a-zA-Z0-9]+)"), "<span class=\"numerator\">\\1</span><span class=\"fraction-line\"></span><span class=\"denominator\">\\2</span>"); // Регулярное выражение для дроби
-
-        QTextCursor cursor = uiPtr->textEdit->textCursor();
-        QString selectedText = cursor.selectedText();
-        int position = cursor.selectionStart();
-
-        if (selectedText.isEmpty()) // Если нет выделенного текста
-        {
-            cursor.insertHtml(formula); // Вставляем отформатированное выражение
-        }
-        else
-        {
-            // Заменяем выделенный текст на отформатированное выражение
-            cursor.removeSelectedText();
-            cursor.insertHtml(formula);
-        }
-    }
-}
-
 void TextEditor::slotSearch()       // функция вызова окна для поиска текста
 {
     searchWidget->setModal(true);
     searchWidget->show();   // показать окно
     m_searchHighLight = new SearchHighLight(uiPtr->textEdit->document());
 }
+
+void TextEditor::slotInsertFormula()
+{
+    QTextCursor cursor = uiPtr->textEdit->textCursor();
+    QString formattedFormula = formulaWidget->insertFormula();
+
+    QString selectedText = cursor.selectedText();
+    if (selectedText.isEmpty())
+    {
+        cursor.insertHtml(formattedFormula + " ");
+        cursor.movePosition(QTextCursor::Right);
+    }
+    else {
+        cursor.removeSelectedText();
+        cursor.insertHtml(formattedFormula + " ");
+    }
+}
+
 
 void TextEditor::slotContextMenu(const QPoint& pos)
 {
@@ -805,7 +772,6 @@ void TextEditor::slotContextMenu(const QPoint& pos)
 void TextEditor::slotSearchText(QString text)       // функция поиска текста
 {
     m_searchHighLight->searchText(text);    // поиск текста
-    //searchWidget->hide();   // скрыть окно
 }
 
 void TextEditor::slotDarkMode()     // функция темной темы
@@ -857,9 +823,7 @@ void TextEditor::slotEnglish()
     uiPtr->toolBar->addWidget(toolbar());    // Добавить виджет заново
     searchWidget = new SearchWidget;
     connect(searchWidget, SIGNAL(signalSearchText(QString)), this, SLOT(slotSearchText(QString)));
-
-    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
-    window = NULL;          // очищение окна кнопок цветовой палитры
+    formulaWidget = new FormulaWidget;
 }
 
 
@@ -874,7 +838,6 @@ void TextEditor::slotRussian()
 
     uiPtr->menubar->clear(); // Очистка динамически созданных меню
     uiPtr->toolBar->clear(); // Очистка динамически созданной панели инструментов
-
     uiPtr->menubar->addMenu(menuConfig());   // добавление в menubar меню File
     uiPtr->menubar->addMenu(editMenu());     // добавление в menubar меню Edit
     uiPtr->menubar->addMenu(formatMenu());   // добавление в menubar меню Format
@@ -886,9 +849,7 @@ void TextEditor::slotRussian()
     uiPtr->toolBar->addWidget(toolbar());    // Добавить виджет заново
     searchWidget = new SearchWidget;
     connect(searchWidget, SIGNAL(signalSearchText(QString)), this, SLOT(slotSearchText(QString)));
-
-    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
-    window = NULL;          // очищение окна кнопок цветовой палитры
+    formulaWidget = new FormulaWidget;
 }
 
 void TextEditor::slotHelp()
@@ -897,10 +858,10 @@ void TextEditor::slotHelp()
     QVBoxLayout *textHelp=new QVBoxLayout;
     QTextEdit *textEdit=new QTextEdit;
     textHelp->addWidget(textEdit);
-    QDialog *helpWidget=new QDialog;// исправление бага B8
+    QDialog *helpWidget=new QDialog;
     helpWidget->setWindowIcon(QIcon(":/res/Icons-file/question"));
     helpWidget->setWindowTitle (tr("Help"));
-    textEdit->setText (tr("Create file (Ctrl+N)\n"
+    textEdit->setText (tr("New file (Ctrl+N)\n"
                       "Open file (Ctrl+O)\n"
                       "Save file (Ctrl+S)\n"
                       "Save with new file name (Ctrl+Shift+S)\n"
@@ -917,7 +878,8 @@ void TextEditor::slotHelp()
                       "Underline text (Ctrl+U)\n"));
     textEdit->setReadOnly(true);
     helpWidget->setLayout(textHelp);
-    helpWidget->setModal(true);// исправление бага B8
+    helpWidget->setModal(true);
+    helpWidget->resize(330, 310);
     helpWidget->show();
 }
 
@@ -927,154 +889,14 @@ void TextEditor::slotAbout()
     QVBoxLayout *textAbout=new QVBoxLayout;
     QTextEdit *textEdit=new QTextEdit;
     textAbout->addWidget(textEdit);
-    QDialog *aboutWidget=new QDialog;//исправление бага B9
+    QDialog *aboutWidget=new QDialog;
     aboutWidget->setWindowIcon(QIcon(":/res/Icons-file/info"));
     aboutWidget->setWindowTitle (tr("About"));
     textEdit->setText (tr("Text Editor version 1.0\n"));
     textEdit->setReadOnly(true);
     aboutWidget->setLayout(textAbout);
-    aboutWidget->setModal(true);//исправление бага B9
+    aboutWidget->setModal(true);
     aboutWidget->show();
-}
-
-void TextEditor::setPaletteColors()
-{   // функция установки цвета отображаемых кнопок
-
-    redColorButton->setStyleSheet("background:red;");
-    orangeColorButton->setStyleSheet("background:orange;");
-    yellowColorButton->setStyleSheet("background:yellow;");
-    greenColorButton->setStyleSheet("background:green;");
-    whiteColorButton->setStyleSheet("background:white;");
-    blueColorButton->setStyleSheet("background:blue;");
-    purpleColorButton->setStyleSheet("background:purple;");
-    blackColorButton->setStyleSheet("background:black;");
-
-}
-
-void TextEditor::onRedColorButtonClicked()      // функция установки красного цвета шрифта
-{
-    uiPtr->textEdit->setTextColor(Qt::red);
-    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
-}
-
-
-void TextEditor::onOrangeColorButtonClicked()       // функция установки оранжевого цвета шрифта
-{
-    uiPtr->textEdit->setTextColor(QColorConstants::Svg::orange);
-    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
-}
-
-
-void TextEditor::onYellowColorButtonClicked()       // функция установки желтого цвета шрифта
-{
-    uiPtr->textEdit->setTextColor(Qt::yellow);
-    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
-}
-
-
-void TextEditor::onGreenColorButtonClicked()        // функция установки зеленого цвета шрифта
-{
-    uiPtr->textEdit->setTextColor(Qt::green);
-    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
-}
-
-
-void TextEditor::onWhiteColorButtonClicked()        // функция установки белого цвета шрифта
-{
-    uiPtr->textEdit->setTextColor(Qt::white);
-    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
-}
-
-
-void TextEditor::onBlueColorButtonClicked()     // функция установки синего цвета шрифта
-{
-    uiPtr->textEdit->setTextColor(Qt::blue);
-    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
-}
-
-
-void TextEditor::onPurpleColorButtonClicked()       // функция установки пурпурного цвета шрифта
-{
-    uiPtr->textEdit->setTextColor(QColorConstants::Svg::purple);
-    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
-}
-
-
-void TextEditor::onBlackColorButtonClicked()        // функция установки черного цвета шрифта
-{
-    uiPtr->textEdit->setTextColor(Qt::black);
-    hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
-}
-
-void TextEditor::createColorPalette(qint32 x ,qint32 y , qint32 height , qint32 width)
-{   // функция выбора цветовой палитры
-
-    if(window == NULL)
-        window = new QWidget(uiPtr->centralwidget); // создание нового окна для кнопок цветовой палитры
-
-    window->setMaximumSize(height,width);
-    window->setGeometry(QRect(x,y,height,width));   // установка положения и размеров окна для кнопок цветовой палитры
-
-    redColorButton = new QPushButton(this);
-    QObject::connect(redColorButton,&QPushButton::clicked, this, &TextEditor::onRedColorButtonClicked);         // кнопка вызова функции красного цвета шрифта
-
-    orangeColorButton= new QPushButton(this);
-    QObject::connect(orangeColorButton,&QPushButton::clicked, this, &TextEditor::onOrangeColorButtonClicked);   // кнопка вызова функции оранжевого цвета шрифта
-
-    yellowColorButton= new QPushButton(this);
-    QObject::connect(yellowColorButton,&QPushButton::clicked, this, &TextEditor::onYellowColorButtonClicked);   // кнопка вызова функции желтого цвета шрифта
-
-    greenColorButton= new QPushButton(this);
-    QObject::connect(greenColorButton,&QPushButton::clicked, this, &TextEditor::onGreenColorButtonClicked);     // кнопка вызова функции зеленого цвета шрифта
-
-    whiteColorButton= new QPushButton(this);
-    QObject::connect(whiteColorButton,&QPushButton::clicked, this, &TextEditor::onWhiteColorButtonClicked);     // кнопка вызова функции белого цвета шрифта
-
-    blueColorButton= new QPushButton(this);
-    QObject::connect(blueColorButton,&QPushButton::clicked, this, &TextEditor::onBlueColorButtonClicked);       // кнопка вызова функции синего цвета шрифта
-
-    purpleColorButton= new QPushButton(this);
-    QObject::connect(purpleColorButton,&QPushButton::clicked, this, &TextEditor::onPurpleColorButtonClicked);   // кнопка вызова функции пурпурного цвета шрифта
-
-    blackColorButton= new QPushButton(this);
-    QObject::connect(blackColorButton,&QPushButton::clicked, this, &TextEditor::onBlackColorButtonClicked);     // кнопка вызова функции черного цвета шрифта
-
-
-    gridGroupBox = new QGroupBox(tr("Palette"),window);     // создание группы для обьединения кнопок окна цветовой палитры
-    colorPalette = new QGridLayout;                         // создание макета сетки для группировки кнопок окна цветовой палитры
-    gridGroupBox->setLayout(colorPalette);                  // добавление макета сетки в группу
-
-    // расстановка кнопок цветовой палитры по сетке
-    colorPalette->addWidget(redColorButton,0,0,Qt::AlignCenter);
-    colorPalette->addWidget(orangeColorButton,0,1,Qt::AlignCenter);
-    colorPalette->addWidget(yellowColorButton,0,2,Qt::AlignCenter);
-    colorPalette->addWidget(greenColorButton,0,3,Qt::AlignCenter);
-    colorPalette->addWidget(whiteColorButton,1,0,Qt::AlignCenter);
-    colorPalette->addWidget(blueColorButton,1,1,Qt::AlignCenter);
-    colorPalette->addWidget(purpleColorButton,1,2,Qt::AlignCenter);
-    colorPalette->addWidget(blackColorButton,1,3,Qt::AlignCenter);
-
-    setPaletteColors();     // вызов функции установки цвета отображаемых кнопок
-
-    if(window->isVisible()){
-        hidePalette(window);    // вызов функции скрытия окна кнопок цветовой палитры
-    }
-    else{
-        showPalette(window);    // вызов функции показа окна кнопок цветовой палитры
-    }
-
-
-}
-
-void TextEditor::hidePalette(QWidget *window)
-{   // функция скрытия окна кнопок цветовой палитры
-    if(window !=NULL && window->isVisible())
-        window->hide();   // если окно видимо - скрыть
-}
-void TextEditor::showPalette(QWidget *window)
-{   // функция показа окна кнопок цветовой палитры
-    if(window !=NULL)
-        window->show();       // показать окно
 }
 
 void TextEditor::slotFileOpen()

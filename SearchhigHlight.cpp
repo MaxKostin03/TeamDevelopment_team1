@@ -1,7 +1,5 @@
 #include "SearchhigHlight.h"
 
-// *** class SearchHighLight
-
 SearchHighLight::SearchHighLight(QTextDocument* parent)
 : BaseClass(parent)
 {

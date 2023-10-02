@@ -14,6 +14,7 @@ CODECFORSRC     = UTF-8
 SOURCES += \
     CalendarWidget.cpp \
     EditWindow.cpp \
+    FormulaWidget.cpp \
     SearchHighLight.cpp \
     TextEditor.cpp \
     SearchWidget.cpp \
@@ -22,6 +23,7 @@ SOURCES += \
 HEADERS += \
     CalendarWidget.h \
     EditWindow.h \
+    FormulaWidget.h \
     SearchHighLight.h \
     TextEditor.h \
     SearchWidget.h
