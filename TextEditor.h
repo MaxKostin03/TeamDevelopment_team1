@@ -11,12 +11,12 @@
 #include <QComboBox>
 #include <QTranslator>
 #include <QLocale>
-//#include <QtWebView>
 
 
 #include "ui_TextEditor.h"
 #include "SearchHighLight.h"
 #include "SearchWidget.h"
+#include "formulawidget.h"
 //#include "CalendarWidget.h"
 
 QT_BEGIN_NAMESPACE
@@ -38,9 +38,6 @@ public:
     bool loadFile(const QString&);
     QLocale *loc;
 
-
-    // bool hasUnsavedChanges(); // не требуется
-
 private slots:
 
     void slotRenameTitle();
@@ -50,7 +47,6 @@ private slots:
     void slotFileSaveAs();
     void slotExportToPdf();
     void slotPrintFile();
-    //void slotExitFile(); // не требуется
     void slotUndo();
     void slotRedo();
     void slotCopy();
@@ -81,16 +77,6 @@ private slots:
     void slotSearchText(QString text);
     void closeEvent(QCloseEvent *event);
 
-
-    void onRedColorButtonClicked();
-    void onOrangeColorButtonClicked();
-    void onYellowColorButtonClicked();
-    void onGreenColorButtonClicked();
-    void onWhiteColorButtonClicked();
-    void onBlueColorButtonClicked();
-    void onPurpleColorButtonClicked();
-    void onBlackColorButtonClicked();
-
     void updateRecentFileActions();
     void openRecentFile();
     void openCalendar();
@@ -101,7 +87,6 @@ private:
 
     Ui::TextEditor *uiPtr;
 
-    // QString file_path = ""; // не требуется
     void createMenu();
     QMenu *menuConfig();
     QMenu *recentMenu;
@@ -118,41 +103,20 @@ private:
     QAction *recentFileSeparator;
     QAction *recentFileSubMenuAct;
 
-
     static bool hasRecentFiles();
     void prependToRecentFiles(const QString& );
     void setRecentFilesVisible(bool );
-
-    // bool isFileSaved = true; // не требуется
-
-    QWidget *window = NULL;
-    QGroupBox *gridGroupBox;
-    QGridLayout *colorPalette;
-    QPushButton *redColorButton;
-    QPushButton *orangeColorButton;
-    QPushButton *yellowColorButton;
-    QPushButton *greenColorButton;
-    QPushButton *whiteColorButton;
-    QPushButton *blueColorButton;
-    QPushButton *purpleColorButton;
-    QPushButton *blackColorButton;
-
     void createStatusBar();
     void readSettings();
     void writeSettings();
 
     QColor selectColor(QString QColorTitleName, QString WindowIconPath);
-    void setPaletteColors();
-    void createColorPalette(qint32 x ,qint32 y , qint32 width=200 , qint32 height=100);
-    void hidePalette(QWidget *window);
-    void showPalette(QWidget *window);
-
 
     QTranslator qtLanguageTranslator;
 
     SearchHighLight* m_searchHighLight;
     SearchWidget *searchWidget;
-    //CalendarWidget *calendarWidget;
+    FormulaWidget *formulaWidget;
 };
 
 
