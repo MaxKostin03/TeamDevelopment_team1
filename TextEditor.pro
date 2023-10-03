@@ -15,6 +15,7 @@ SOURCES += \
     CalendarWidget.cpp \
     EditWindow.cpp \
     FormulaWidget.cpp \
+    ResizeImage.cpp \
     SearchHighLight.cpp \
     TextEditor.cpp \
     SearchWidget.cpp \
@@ -24,6 +25,7 @@ HEADERS += \
     CalendarWidget.h \
     EditWindow.h \
     FormulaWidget.h \
+    ResizeImage.h \
     SearchHighLight.h \
     TextEditor.h \
     SearchWidget.h
