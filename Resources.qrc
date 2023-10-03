@@ -35,6 +35,7 @@
         <file>Icons-file/AlignRight.png</file>
         <file>Icons-file/calendar.png</file>
         <file>Icons-file/background_color.png</file>
+        <file>Icons-file/resize_image.png</file>
     </qresource>
     <qresource prefix="/">
         <file>QtLanguage_ru.qm</file>

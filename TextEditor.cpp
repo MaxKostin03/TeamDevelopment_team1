@@ -13,6 +13,7 @@
 
 #include "TextEditor.h"
 #include "CalendarWidget.h"
+#include "ResizeImage.h"
 
 QPointer<CalendarWidget> calendarWidget;
 QLocale *local = new QLocale;
@@ -410,6 +411,40 @@ void TextEditor::slotSelectAll()        // функция выделить вс�
     uiPtr->textEdit->selectAll();
 }
 
+void TextEditor::slotResizeImage(){
+
+    QTextBlock currentBlock = uiPtr->textEdit->textCursor().block();
+    QTextBlock::iterator it;
+
+    for (it = currentBlock.begin(); !(it.atEnd()); ++it)
+    {
+        QTextFragment fragment = it.fragment();
+        if (fragment.isValid())
+        {
+            if(fragment.charFormat().isImageFormat ())
+            {
+                ResizeImageDialog *rs = new ResizeImageDialog(this);
+                QTextImageFormat newImageFormat = fragment.charFormat().toImageFormat();
+                QPair<double, double> size = rs->getNewSize(this,newImageFormat.width(),newImageFormat.height());
+
+                newImageFormat.setWidth(size.first);
+                newImageFormat.setHeight(size.second);
+
+
+                if (newImageFormat.isValid())
+                {
+                    QTextCursor helper = uiPtr->textEdit->textCursor();
+                    helper.setPosition(fragment.position());
+                    helper.setPosition(fragment.position() + fragment.length(),
+                                       QTextCursor::KeepAnchor);
+                    helper.setCharFormat(newImageFormat);
+                }
+            }
+        }
+    }
+
+}
+
 void TextEditor::slotDelete()
 {
     QTextCursor cursor = uiPtr->textEdit->textCursor();
@@ -576,6 +611,7 @@ void TextEditor::slotFontStyle()        // функция изменения с�
 {
     bool ok;
     QFont font = QFontDialog::getFont(&ok, this);   // вызов программы изменения стиля шрифта
+
     if (ok)
     {
         uiPtr->textEdit->setCurrentFont(font);      // если ОК - применить стиль
@@ -638,7 +674,7 @@ void TextEditor::slotFontColor()
 
     QTextCharFormat originalFormat = cursor.charFormat();
 
-    QString QColorTitleName = tr("Select Text Color");
+    QString QColorTitleName = tr("Select text color");
     QString WigdetIconPath = ":/res/Icons-file/color-text";
     QColor textColor = selectColor(QColorTitleName, WigdetIconPath);
 
@@ -764,6 +800,15 @@ void TextEditor::slotContextMenu(const QPoint& pos)
     QAction *selectAllAction = new QAction(tr("Select All"), this);
     contextMenu->addAction(selectAllAction);
     connect(selectAllAction, &QAction::triggered, this, &TextEditor::slotSelectAll);
+
+    QTextCursor *cursor = new QTextCursor; //контексное меню с изменением размера изображения
+    *cursor=uiPtr->textEdit->textCursor();
+    if(cursor->charFormat().isImageFormat() && !(cursor->atBlockStart()) && !(cursor->atStart())){
+    QAction *resizeImage = new QAction(tr("Resize Image"), this);
+    contextMenu->addAction(resizeImage);
+    connect(resizeImage, &QAction::triggered, this, &TextEditor::slotResizeImage);
+
+    }
 
     // Отображаем контекстное меню в указанной позиции
     contextMenu->exec(uiPtr->textEdit->mapToGlobal(pos));

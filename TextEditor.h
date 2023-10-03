@@ -53,6 +53,7 @@ private slots:
     void slotCut();
     void slotPaste();
     void slotSelectAll();
+    void slotResizeImage();
     void slotDelete();
     void slotBold();
     void slotItalic();
