@@ -294,10 +294,12 @@ QToolBar *TextEditor::toolbar()     // заполнение в toolbar блок�
     QWidget *Date = new QWidget;
     Date->setSizePolicy(*policy);
     QLabel *currentDate = new QLabel;
-    currentDate->setStyleSheet("color: rgb(255, 255, 255)");
+    currentDate->setStyleSheet("color: #ffffff");
+    currentDate->setFont(*setDataFont);
     currentDate->setText(QDate::currentDate().toString("dd.MM.yyyy"));
     toolbar->addWidget(Date);
     toolbar->addWidget(currentDate);
+
 
     QAction *calendar = toolbar->addAction(QIcon(":/res/Icons-file/calendar"), tr("Calendar"));
     connect(calendar,SIGNAL(triggered(bool)),this,SLOT(openCalendar()));
@@ -423,6 +425,7 @@ void TextEditor::slotResizeImage(){
         {
             if(fragment.charFormat().isImageFormat ())
             {
+                if(fragment.position()>=uiPtr->textEdit->textCursor().anchor() && (fragment.position()<=uiPtr->textEdit->textCursor().position())){
                 ResizeImageDialog *rs = new ResizeImageDialog(this);
                 QTextImageFormat newImageFormat = fragment.charFormat().toImageFormat();
                 QPair<double, double> size = rs->getNewSize(this,newImageFormat.width(),newImageFormat.height());
@@ -442,7 +445,7 @@ void TextEditor::slotResizeImage(){
             }
         }
     }
-
+    }
 }
 
 void TextEditor::slotDelete()
@@ -801,9 +804,8 @@ void TextEditor::slotContextMenu(const QPoint& pos)
     contextMenu->addAction(selectAllAction);
     connect(selectAllAction, &QAction::triggered, this, &TextEditor::slotSelectAll);
 
-    QTextCursor *cursor = new QTextCursor; //контексное меню с изменением размера изображения
-    *cursor=uiPtr->textEdit->textCursor();
-    if(cursor->charFormat().isImageFormat() && !(cursor->atBlockStart()) && !(cursor->atStart())){
+
+    if(uiPtr->textEdit->textCursor().charFormat().isImageFormat() && !(uiPtr->textEdit->textCursor().atStart()) && !(uiPtr->textEdit->textCursor().atBlockStart()) && (uiPtr->textEdit->textCursor().position()-uiPtr->textEdit->textCursor().anchor()) == 1) {
     QAction *resizeImage = new QAction(tr("Resize Image"), this);
     contextMenu->addAction(resizeImage);
     connect(resizeImage, &QAction::triggered, this, &TextEditor::slotResizeImage);
