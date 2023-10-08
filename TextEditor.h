@@ -65,6 +65,11 @@ private slots:
     void slotInTheCenter();
     void slotRightSide();
     void slotTextBackgroundColor();
+    void slotInsertTable();
+    void slotInsertTableRows();
+    void slotInsertTableColumns();
+    void slotRemoveTableRows();
+    void slotRemoveTableColumns();
     void slotInsertImage();
     void slotInsertFormula();
     void slotDarkMode();

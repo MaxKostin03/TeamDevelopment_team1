@@ -10,13 +10,17 @@
 #include <QColorDialog>
 #include <QLibraryInfo>
 #include <QApplication>
+#include <QPointer>
+#include <QScreen>
+#include <QDebug>
+#include <QTextTableCell>
 
 #include "TextEditor.h"
 #include "CalendarWidget.h"
 #include "ResizeImage.h"
 
 QPointer<CalendarWidget> calendarWidget;
-QLocale *local = new QLocale;
+QLocale *localLanguage = new QLocale;
 
 // *** class TextEditor
 
@@ -31,7 +35,7 @@ TextEditor::TextEditor(QWidget *parent)
     uiPtr->setupUi(this);
 
     *loc=QLocale::English;
-    *local=QLocale::English;
+    *localLanguage=QLocale::English;
     slotLightMode();
     qtLanguageTranslator.load(":/QtLanguage_ru.qm", ".");
 
@@ -152,6 +156,7 @@ QMenu *TextEditor::insertMenu()     // заполнение меню Insert
     menuInsertPtr->setTitle(tr("Insert"));
     menuInsertPtr->addAction(tr("Image"), this, &TextEditor::slotInsertImage)->setIcon(QIcon(":/res/Icons-file/insert-picture-icon"));  // кнопка вызова функции добавления изображения
     menuInsertPtr->addAction(tr("Formula"), this, &TextEditor::slotInsertFormula)->setIcon(QIcon(":/res/Icons-file/insert-formula-icon"));  // кнопка вызова функции добавления формулы
+    menuInsertPtr->addAction(tr("Table"), this, &TextEditor::slotInsertTable)->setIcon(QIcon(":/res/Icons-file/insert-table-icon"));  // кнопка вызова функции добавления формулы
     return menuInsertPtr;
 }
 
@@ -265,6 +270,8 @@ QToolBar *TextEditor::toolbar()     // заполнение в toolbar блок�
     QAction *background_color = toolbar->addAction(QIcon(":/res/Icons-file/background_color"), tr("Background color"));     // кнопка вызова функции цвета фона текста
     connect(background_color, &QAction::triggered, this, &TextEditor::slotTextBackgroundColor);
 
+    toolbar->addSeparator();
+
     QAction *align_left = toolbar->addAction(QIcon(":/res/Icons-file/AlignLeft"), tr("Align left"));             // кнопка вызова функции выравнивания текста по левому краю
     connect(align_left, &QAction::triggered, this, &TextEditor::slotLeftSide);
 
@@ -275,6 +282,9 @@ QToolBar *TextEditor::toolbar()     // заполнение в toolbar блок�
     connect(align_right, &QAction::triggered, this, &TextEditor::slotRightSide);
 
     toolbar->addSeparator();
+
+    QAction *table = toolbar->addAction(QIcon(":/res/Icons-file/insert-table-icon"), tr("Insert table"));     // кнопка вызова функции вставки таблицы
+    connect(table, &QAction::triggered, this, &TextEditor::slotInsertTable);
 
     QAction *image = toolbar->addAction(QIcon(":/res/Icons-file/insert-picture-icon"), tr("Insert image"));     // кнопка вызова функции добавления изображения
     connect(image, &QAction::triggered, this, &TextEditor::slotInsertImage);
@@ -612,6 +622,19 @@ void TextEditor::slotCrossedOut()
 
 void TextEditor::slotFontStyle()        // функция изменения стиля шрифта
 {
+    QString *languageSelect = new QString;
+    if(localLanguage->languageToString(localLanguage->language())=="English"){
+        *languageSelect="en_EN";
+    }
+    else{
+        *languageSelect="ru_RU";
+    }
+
+    QTranslator qtTranslator;
+    if (qtTranslator.load("qt_" + *languageSelect, QLibraryInfo::path(QLibraryInfo::TranslationsPath)))
+        qApp->installTranslator(&qtTranslator);
+
+    setWindowIcon(QIcon(":/res/Icons-file/font-adjustment"));
     bool ok;
     QFont font = QFontDialog::getFont(&ok, this);   // вызов программы изменения стиля шрифта
 
@@ -652,7 +675,7 @@ void TextEditor::slotRightSide()                              // функция 
 QColor TextEditor::selectColor(QString QColorTitleName, QString WindowIconPath)                   //цветовая палитра
 {
     QString *languageSelect = new QString;
-    if(local->languageToString(local->language())=="English"){
+    if(localLanguage->languageToString(localLanguage->language())=="English"){
         *languageSelect="en_EN";
     }
     else{
@@ -726,6 +749,129 @@ void TextEditor::slotTextBackgroundColor()
     cursor.setPosition(cursor.selectionEnd());
 
     uiPtr->textEdit->setTextCursor(cursor);
+}
+
+void TextEditor::slotInsertTable()
+{
+    bool ok;
+    QString *insertTableString = new QString;
+    QString *insertNumRowString = new QString;
+    QString *insertNumColumnsString = new QString;
+    QString *insertWidthString = new QString;
+    if(localLanguage->languageToString(localLanguage->language())=="English"){
+        *insertTableString = "Insert table";
+        *insertNumRowString = "Number of rows:";
+        *insertNumColumnsString = "Number of columnes:";
+        *insertWidthString = "Width of Table:";
+    }
+    else{
+        *insertTableString = "Вставка таблицы";
+        *insertNumRowString = "Количество строк:";
+        *insertNumColumnsString = "Количество столбцов:";
+        *insertWidthString = "Ширина таблицы:";
+    }
+    QTextTableFormat tableFormat;       // форматирование таблицы
+    tableFormat.setAlignment(Qt::AlignHCenter);
+    tableFormat.setBorderStyle( QTextTableFormat::BorderStyle_Solid );
+    tableFormat.setCellPadding(0);
+    tableFormat.setMargin(0);
+    tableFormat.setCellSpacing(0);
+
+    // пользовательский ввод размеров
+    int rows = 0, columnes = 0;
+    double widthOfTable = 0;
+    QWidget *parentTableInsertWidget = new QWidget;
+    parentTableInsertWidget->setWindowIcon(QIcon(":/res/Icons-file/insert-table-icon"));
+    rows = QInputDialog::getInt(parentTableInsertWidget, *insertTableString, *insertNumRowString, rows, 1, 2147483647 , 1 , &ok);
+    columnes = QInputDialog::getInt(parentTableInsertWidget, *insertTableString, *insertNumColumnsString, columnes, 1, 2147483647 , 1, &ok);
+    widthOfTable = QInputDialog::getDouble(parentTableInsertWidget, *insertTableString, *insertWidthString, widthOfTable, 1, 2147483647 , 1, &ok);
+    QVector<QTextLength> constraints;
+    double widthoftextedit=uiPtr->textEdit->width();
+    double percetageOfWidth=(widthOfTable/widthoftextedit) *100;
+    if (percetageOfWidth>100){
+        percetageOfWidth=100;
+    }
+
+    for(int i = 0; i<=columnes; i++){
+        constraints << QTextLength(QTextLength::PercentageLength, percetageOfWidth/columnes);
+    }
+
+    tableFormat.setColumnWidthConstraints(constraints);
+    uiPtr->textEdit->textCursor().insertTable(rows, columnes, tableFormat);
+}
+
+void TextEditor::slotInsertTableRows(){
+    QTextTable *selectedTable;
+    selectedTable=uiPtr->textEdit->textCursor().currentTable();
+    QTextTableCell *index = new QTextTableCell;
+    *index=uiPtr->textEdit->textCursor().currentTable()->cellAt(uiPtr->textEdit->textCursor().position());
+    int numberOfInsertingRows = uiPtr->textEdit->textCursor().currentTable()->cellAt(uiPtr->textEdit->textCursor().position()).row() - uiPtr->textEdit->textCursor().currentTable()->cellAt(uiPtr->textEdit->textCursor().anchor()).row();
+    if(numberOfInsertingRows < 0){
+        numberOfInsertingRows=numberOfInsertingRows*(-1);
+        selectedTable->insertRows(index->row()+numberOfInsertingRows+1, numberOfInsertingRows+1); // если идет выделение рядов снизу вверх
+    }
+    else{
+        selectedTable->insertRows(index->row()+1, numberOfInsertingRows+1); // если идет выделение рядов сверху вниз
+    }
+}
+
+void TextEditor::slotRemoveTableRows(){
+    QTextTable *selectedTable;
+    selectedTable=uiPtr->textEdit->textCursor().currentTable();
+    QTextTableCell *index = new QTextTableCell;
+    *index=uiPtr->textEdit->textCursor().currentTable()->cellAt(uiPtr->textEdit->textCursor().position());
+    int numberOfRemovingRows = uiPtr->textEdit->textCursor().currentTable()->cellAt(uiPtr->textEdit->textCursor().position()).row() - uiPtr->textEdit->textCursor().currentTable()->cellAt(uiPtr->textEdit->textCursor().anchor()).row();
+    if(numberOfRemovingRows <0){
+        numberOfRemovingRows=numberOfRemovingRows*(-1);
+        selectedTable->removeRows(index->row(), numberOfRemovingRows+1); // если идет выделение рядов снизу вверх
+    }
+    else
+    {
+        selectedTable->removeRows(index->row()-numberOfRemovingRows, numberOfRemovingRows+1); // если идет выделение рядов сверху вниз
+    }
+}
+
+void TextEditor::slotInsertTableColumns(){
+    QTextTable *selectedTable;
+    selectedTable=uiPtr->textEdit->textCursor().currentTable();
+    QTextTableFormat * selectedTableFormat = new QTextTableFormat;
+    *selectedTableFormat=selectedTable->format();
+    QVector <QTextLength> constraints = selectedTableFormat->columnWidthConstraints();
+    double  tableWidth = ((constraints[1].rawValue() * selectedTable->columns())/100)*uiPtr->textEdit->width();
+    double  columnWidth = (constraints[1].rawValue() /100)*uiPtr->textEdit->width();
+
+    QTextTableCell *index = new QTextTableCell;
+    *index=uiPtr->textEdit->textCursor().currentTable()->cellAt(uiPtr->textEdit->textCursor().position());
+    int numberOfInsertingColumns = uiPtr->textEdit->textCursor().currentTable()->cellAt(uiPtr->textEdit->textCursor().position()).column() - uiPtr->textEdit->textCursor().currentTable()->cellAt(uiPtr->textEdit->textCursor().anchor()).column();
+    if(numberOfInsertingColumns < 0){
+        numberOfInsertingColumns=(numberOfInsertingColumns*(-1)) + 1;
+        if((numberOfInsertingColumns * columnWidth < uiPtr->textEdit->width() - tableWidth) && (columnWidth <= uiPtr->textEdit->width() - tableWidth))  {
+
+            selectedTable->insertColumns(index->column()+numberOfInsertingColumns, numberOfInsertingColumns); // если идет выделение столбцов справа налево
+        }
+    }
+    else{
+        numberOfInsertingColumns=numberOfInsertingColumns + 1;
+        if((numberOfInsertingColumns * columnWidth < uiPtr->textEdit->width() - tableWidth) && (columnWidth <= uiPtr->textEdit->width() - tableWidth))  {
+        selectedTable->insertColumns(index->column()+1, numberOfInsertingColumns); // если идет выделение столбцов слева направо
+        }
+    }
+}
+void TextEditor::slotRemoveTableColumns(){
+    QTextTable *selectedTable;
+    selectedTable=uiPtr->textEdit->textCursor().currentTable();
+    QTextTableCell *index = new QTextTableCell;
+    *index=uiPtr->textEdit->textCursor().currentTable()->cellAt(uiPtr->textEdit->textCursor().position());
+    int numberOfRemovingColumns = uiPtr->textEdit->textCursor().currentTable()->cellAt(uiPtr->textEdit->textCursor().position()).column() - uiPtr->textEdit->textCursor().currentTable()->cellAt(uiPtr->textEdit->textCursor().anchor()).column();
+    if(numberOfRemovingColumns <0){
+        numberOfRemovingColumns=numberOfRemovingColumns*(-1);
+        selectedTable->removeColumns(index->column(), numberOfRemovingColumns+1); // если идет выделение столбцов справа налево
+    }
+    else
+    {
+        selectedTable->removeColumns(index->column()-numberOfRemovingColumns, numberOfRemovingColumns+1); // если идет выделение столбцов слева направо
+    }
+
 }
 
 void TextEditor::slotInsertImage()      // функция добавления изображения
@@ -812,6 +958,41 @@ void TextEditor::slotContextMenu(const QPoint& pos)
 
     }
 
+    if(uiPtr->textEdit->textCursor().currentTable() != nullptr){
+    contextMenu->addSeparator();
+    QString *addRowString = new QString;
+    QString *removeRowString = new QString;
+    QString *addColumnString = new QString;
+    QString *removeColumnString = new QString;
+    if(localLanguage->languageToString(localLanguage->language())=="English"){
+        *addRowString = "Add selected rows";
+        *removeRowString = "Remove selected rows";
+        *addColumnString = "Add selected columns";
+        *removeColumnString = "Remove selected columns";
+    }
+    else{
+        *addRowString = "Добавить выделенные строки";
+        *removeRowString = "Удалить выделенные строки";
+        *addColumnString = "Добавить выделенные столбцы";
+        *removeColumnString = "Удалить выделенные столбцы";
+    }
+    QAction *addrows = new QAction(*addRowString, this);
+    contextMenu->addAction(addrows);
+    connect(addrows, &QAction::triggered, this, &TextEditor::slotInsertTableRows);
+
+    QAction *addcolumns = new QAction(*addColumnString, this);
+    contextMenu->addAction(addcolumns);
+    connect(addcolumns, &QAction::triggered, this, &TextEditor::slotInsertTableColumns);
+
+    QAction *removerows = new QAction(*removeRowString, this);
+    contextMenu->addAction(removerows);
+    connect(removerows, &QAction::triggered, this, &TextEditor::slotRemoveTableRows);
+
+    QAction *removecolums = new QAction(*removeColumnString, this);
+    contextMenu->addAction(removecolums);
+    connect(removecolums, &QAction::triggered, this, &TextEditor::slotRemoveTableColumns);
+    }
+
     // Отображаем контекстное меню в указанной позиции
     contextMenu->exec(uiPtr->textEdit->mapToGlobal(pos));
 }
@@ -850,7 +1031,7 @@ void TextEditor::slotEnglish()
     qApp->removeTranslator(&qtLanguageTranslator);
     uiPtr->retranslateUi(this);
     *loc=QLocale::English;
-    *local=QLocale::English;
+    *localLanguage=QLocale::English;
 
     this->setWindowTitle(tr("Text Editor"));
 
@@ -879,7 +1060,7 @@ void TextEditor::slotRussian()
     qApp->installTranslator(&qtLanguageTranslator);
     uiPtr->retranslateUi(this);
     *loc=QLocale::Russian;
-    *local=QLocale::Russian;
+    *localLanguage=QLocale::Russian;
 
     //Настройка перевода динамических элементов
 
@@ -900,52 +1081,70 @@ void TextEditor::slotRussian()
 }
 
 void TextEditor::slotHelp()
-{   // функция Help
-
-    QVBoxLayout *textHelp=new QVBoxLayout;
-    QTextEdit *textEdit=new QTextEdit;
-    textHelp->addWidget(textEdit);
-    QDialog *helpWidget=new QDialog;
+{   // Функция Help
+    QDialog *helpWidget = new QDialog;
     helpWidget->setWindowIcon(QIcon(":/res/Icons-file/question"));
-    helpWidget->setWindowTitle (tr("Help"));
-    textEdit->setText (tr("New file (Ctrl+N)\n"
-                      "Open file (Ctrl+O)\n"
-                      "Save file (Ctrl+S)\n"
-                      "Save with new file name (Ctrl+Shift+S)\n"
-                      "Print file (Ctrl+P)\n"
-                      "Exit (Ctrl+F4)\n"
-                      "Undo action (Ctrl+Z)\n"
-                      "Repeat action (Ctrl+Y)\n"
-                      "Copy (Ctrl+C)\n"
-                      "Cut (Ctrl+X)\n"
-                      "Paste (Ctrl+V)\n"
-                      "Select all (Ctrl+A)\n"
-                      "Applying bold text (Ctrl+B)\n"
-                      "Applying italic text (Ctrl+I)\n"
-                      "Underline text (Ctrl+U)\n"));
+    helpWidget->setWindowTitle(tr("Help"));
+
+    helpWidget->setStyleSheet("background-color: white;");
+    QHBoxLayout *layout = new QHBoxLayout;
+    QLabel *imageLabel = new QLabel;
+    QPixmap image(":/res/Icons-file/question"); // Изображение
+    imageLabel->setPixmap(image);
+    layout->addWidget(imageLabel);
+
+    QTextEdit *textEdit = new QTextEdit;
+    textEdit->setText (tr("New file (Ctrl+N)\n\n"
+                         "Open file (Ctrl+O)\n\n"
+                         "Save file (Ctrl+S)\n\n"
+                         "Save with new file name (Ctrl+Shift+S)\n\n"
+                         "Print file (Ctrl+P)\n\n"
+                         "Exit (Ctrl+F4)\n\n"
+                         "Undo action (Ctrl+Z)\n\n"
+                         "Repeat action (Ctrl+Y)\n\n"
+                         "Copy (Ctrl+C)\n\n"
+                         "Cut (Ctrl+X)\n\n"
+                         "Paste (Ctrl+V)\n\n"
+                         "Select all (Ctrl+A)\n\n"
+                         "Applying bold text (Ctrl+B)\n\n"
+                         "Applying italic text (Ctrl+I)\n\n"
+                         "Underline text (Ctrl+U)\n"));
     textEdit->setReadOnly(true);
-    helpWidget->setLayout(textHelp);
+    textEdit->setFrameStyle(QFrame::NoFrame); // Удаление рамок
+    layout->addWidget(textEdit);
+
+    helpWidget->setLayout(layout);
     helpWidget->setModal(true);
-    helpWidget->resize(330, 310);
+    helpWidget->resize(500, 530);
     helpWidget->show();
 }
 
 void TextEditor::slotAbout()
 {   // функция About
 
-    QVBoxLayout *textAbout=new QVBoxLayout;
-    QTextEdit *textEdit=new QTextEdit;
-    textAbout->addWidget(textEdit);
-    QDialog *aboutWidget=new QDialog;
+    QDialog *aboutWidget = new QDialog;
     aboutWidget->setWindowIcon(QIcon(":/res/Icons-file/info"));
-    aboutWidget->setWindowTitle (tr("About"));
-    textEdit->setText (tr("Text Editor version 1.0\n"));
+    aboutWidget->setWindowTitle(tr("About"));
+
+    aboutWidget->setStyleSheet("background-color: white;");
+    QHBoxLayout *layout = new QHBoxLayout;
+    QLabel *imageLabel = new QLabel;
+    QPixmap image(":/res/Icons-file/info"); // Изображение
+    imageLabel->setPixmap(image);
+    layout->addWidget(imageLabel);
+
+    QTextEdit *textEdit = new QTextEdit;
+    textEdit->setText (tr("\n\n\nText Editor version 1.0\n\n"
+                         "Command 1\n\n"
+                         "© 2023 All rights reserved."));
     textEdit->setReadOnly(true);
-    aboutWidget->setLayout(textAbout);
+    textEdit->setFrameStyle(QFrame::NoFrame); // Удаление рамок
+    layout->addWidget(textEdit);
+
+    aboutWidget->setLayout(layout);
     aboutWidget->setModal(true);
     aboutWidget->show();
 }
-
 void TextEditor::slotFileOpen()
 {
 
