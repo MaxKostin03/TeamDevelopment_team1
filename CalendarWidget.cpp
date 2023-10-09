@@ -17,7 +17,6 @@ CalendarWidget::CalendarWidget(TextEditor *parent) { //конструктор
     QComboBox *monthCombo = new QComboBox;
     for (int month = 1; month <= 12; ++month)
         monthCombo->addItem(parent->loc->monthName(month,QLocale::LongFormat));
-    //monthCombo->addItem(QLocale(QLocale::English).monthName(month,QLocale::LongFormat));
     QDateTimeEdit *yearEdit = new QDateTimeEdit;
     yearEdit->setDisplayFormat("yyyy");
     yearEdit->setDateRange (QDate(1918, 1, 1), QDate(9998, 1, 1));
