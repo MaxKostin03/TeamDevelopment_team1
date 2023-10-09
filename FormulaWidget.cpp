@@ -58,9 +58,10 @@ QString FormulaWidget::formatFormula(const QString &inputFormula)
     formula.replace("+", "&#43;");
     formula.replace("-", "&#8722;");
     formula.replace("*", "&#215;");
+    //formula.replace("/", "&#247;");
     formula.replace("PI", "π");
 
-        formula.replace(QRegularExpression("([a-zA-Z0-9]+)\\(([^)]+)\\)\\^(\\d+)"), "\\1(\\2)<sup>\\3</sup>");
+    formula.replace(QRegularExpression("([a-zA-Z0-9]+)\\(([^)]+)\\)\\^(\\d+)"), "\\1(\\2)<sup>\\3</sup>");
     formula.replace("sqrt", "<span>&radic;</span>");
     formula.replace(QRegularExpression("(\\w+)\\^(\\w+)"), "\\1<sup>\\2</sup>");
     formula.replace(QRegularExpression("([a-zA-Z0-9]+)\\s*/\\s*([a-zA-Z0-9]+)"),
